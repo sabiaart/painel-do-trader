@@ -95,6 +95,42 @@ def manter_anterior(nome: str, motivo: str) -> dict | None:
     return anterior
 
 
+def chave(nome: str) -> str | None:
+    """Le uma chave de API.
+
+    Procura em dois lugares, nesta ordem:
+
+    1. Variavel de ambiente - e assim que o robo do GitHub recebe a chave,
+       a partir dos segredos do repositorio.
+    2. Arquivo `chaves.env` na raiz do projeto - e assim no seu computador.
+
+    O `chaves.env` esta no .gitignore e NUNCA vai para o GitHub. O formato
+    dele e uma linha por chave:
+
+        ALPHA_VANTAGE=suachaveaqui
+
+    Devolve None quando a chave nao existe. Quem chamou decide o que fazer:
+    nenhum bloco do painel pode quebrar so porque falta uma chave.
+    """
+    import os
+
+    valor = os.environ.get(nome)
+    if valor:
+        return valor.strip()
+
+    arquivo = RAIZ / "chaves.env"
+    if not arquivo.exists():
+        return None
+    for linha in arquivo.read_text(encoding="utf-8").splitlines():
+        linha = linha.strip()
+        if not linha or linha.startswith("#") or "=" not in linha:
+            continue
+        k, _, v = linha.partition("=")
+        if k.strip() == nome:
+            return v.strip().strip('"').strip("'") or None
+    return None
+
+
 def cabecalho(origem: str, *, exemplo: bool = False) -> dict:
     """Os campos que todo arquivo de dados precisa ter."""
     return {

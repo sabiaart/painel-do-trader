@@ -19,6 +19,19 @@ Conteudo informativo. Nao e recomendacao de investimento.
 - `ESPECIFICACAO.md` — a especificacao completa do projeto. Ler antes de qualquer tarefa nova.
 - `CLAUDE.md` — as regras de trabalho.
 
+## Como abrir o painel no seu computador
+
+De dois cliques em **Painel.bat**. Ele busca os dados do dia, liga o painel e
+abre o navegador. Para fechar, feche a janela preta.
+
+Precisa do Python instalado (https://www.python.org/downloads/, marcando
+"Add Python to PATH" na instalacao). Nada mais precisa ser instalado: o
+pipeline usa so a biblioteca padrao.
+
+As chaves de API ficam em `chaves.env`, na raiz. Copie `chaves.env.exemplo`,
+renomeie para `chaves.env` e cole a sua chave. Esse arquivo esta no
+.gitignore e nunca vai para o GitHub.
+
 ## O site e privado
 
 Enquanto for so do dono, o painel fica atras de usuario e senha. Isso nao e
