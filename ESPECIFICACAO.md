@@ -244,6 +244,12 @@ Custos possíveis depois: licença de cotações da B3 com atraso (via distribui
 - [ ] Termos dos **feeds RSS** de notícias usados no tom das notícias.
 - [ ] Custo de **cotações com atraso** da B3 via distribuidor (para a fase "Depois").
 
+### Acrescentado em 02/11/2026, depois da pesquisa de APIs
+
+- [ ] **Nenhuma API de mercados globais pesquisada permite exibição pública em plano barato.** Twelve Data, Finnhub, FMP, EODHD e Polygon (hoje Massive) tratam os planos de autoatendimento como uso pessoal e não comercial; exibição pública exige plano empresarial ou contrato negociado. O gargalo não é o fornecedor: é a licença das bolsas (NYSE, Nasdaq, CME, ICE, DCE) por baixo. Decidir entre adiar o bloco de globais ou orçar centenas de dólares por mês.
+- [ ] **VXEWZCLS (volatilidade do EWZ), já em uso no site.** O FRED marca a série como "Copyrighted: Citation required", da Cboe. A citação já foi colocada na tela, mas duas coisas seguem em aberto: se exibição em site com anúncios se enquadra no uso permitido, e se a proibição de "store, cache, or archive" do FRED alcança o nosso JSON. Resolver com o FRED (stlsFRED@stls.frb.org) ou com a Cboe **antes da Fase 7**, que é quando entram os anúncios.
+- [ ] Séries do FRED vindas de órgãos do governo americano (DGS10, Treasury; DCOILBRENTEU, Brent/EIA) são "Public Domain: Citation requested" e não têm esse problema. Preferir essas sempre que der.
+
 ---
 
 ## 11. Como trabalhar com o dono do projeto

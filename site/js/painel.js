@@ -282,7 +282,8 @@ async function niveis() {
       const dia = new Date(`${vol.data}T12:00:00`).toLocaleDateString("pt-BR");
       linhaVol.innerHTML =
         `Volatilidade <b>${fmt(vol.anual_pct, 1)}% ao ano</b>, ${vol.metodo}, de ${dia}. ` +
-        `Fonte: ${vol.fonte}. O ajuste anterior ainda é de exemplo.`;
+        `Fonte: ${vol.fonte}. O ajuste anterior ainda é de exemplo.` +
+        (vol.citacao ? `<br><span class="muted">${vol.citacao}</span>` : "");
       linhaVol.hidden = false;
     } else {
       linhaVol.hidden = true;

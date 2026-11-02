@@ -63,6 +63,7 @@ def atualizar_niveis() -> dict:
             "anual_pct": round(vol * 100, 1),
             "metodo": f"histórica de {JANELA_VOL} pregões",
             "fonte": "Banco Central (SGS 1, dólar PTAX de venda)",
+            "citacao": "Banco Central do Brasil, sistema SGS, série 1 (dólar PTAX de venda).",
             "data": serie[-1][0].isoformat(),
         }
         resultados["wdo"] = f"vol {vol * 100:.1f}% a.a. (PTAX de {serie[-1][0]:%d/%m})"
@@ -82,6 +83,12 @@ def atualizar_niveis() -> dict:
             "anual_pct": round(vol * 100, 1),
             "metodo": "implícita do EWZ (reserva do VIX do Ibovespa)",
             "fonte": "FRED / Cboe (VXEWZCLS)",
+            # O FRED marca esta serie como "Copyrighted: Citation required".
+            # A citacao sugerida por eles e obrigatoria onde o dado aparece.
+            "citacao": (
+                "Chicago Board Options Exchange, CBOE Brazil ETF Volatility Index "
+                "[VXEWZCLS], retrieved from FRED, Federal Reserve Bank of St. Louis."
+            ),
             "data": serie[-1][0].isoformat(),
         }
         resultados["win"] = f"vol {vol * 100:.1f}% a.a. (VXEWZ de {serie[-1][0]:%d/%m})"
