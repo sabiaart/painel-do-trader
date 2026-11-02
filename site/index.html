@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel do Trader — em construção</title>
+<meta name="description" content="Painel gratuito de contexto do mercado brasileiro para quem opera mini índice (WIN) e mini dólar (WDO). Em construção.">
+<meta name="robots" content="noindex">
+<style>
+:root{
+  --bg:#0E1318; --panel:#151C23; --line:#26313B; --fg:#E4EAEF; --muted:#93A1AE;
+  --accent:#4FB8A0; --chip:#1C252E;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+  --bg:#F3F5F6; --panel:#FFFFFF; --line:#DCE2E7; --fg:#15202A; --muted:#566573;
+  --accent:#16806A; --chip:#EAEFF2; color-scheme:light } }
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--fg); font-family:var(--body);
+  line-height:1.55; display:flex; flex-direction:column; min-height:100vh;
+}
+main{
+  flex:1; width:100%; max-width:640px; margin:0 auto;
+  padding:48px 16px; display:flex; flex-direction:column; justify-content:center;
+}
+.selo{
+  display:inline-block; align-self:flex-start; font-family:var(--mono);
+  font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--accent); background:var(--chip); border:1px solid var(--line);
+  border-radius:999px; padding:5px 12px; margin-bottom:20px;
+}
+h1{
+  font-family:var(--display); font-weight:600; font-size:clamp(28px,8vw,44px);
+  line-height:1.1; margin:0 0 14px;
+}
+.sub{color:var(--muted); font-size:clamp(15px,4vw,17px); margin:0 0 32px}
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:20px;
+}
+.card h2{
+  font-family:var(--display); font-size:15px; text-transform:uppercase;
+  letter-spacing:.05em; color:var(--muted); font-weight:600; margin:0 0 12px;
+}
+ol{margin:0; padding-left:22px}
+ol li{margin-bottom:7px}
+ol li:last-child{margin-bottom:0}
+ol li.feito{color:var(--muted)}
+footer{
+  border-top:1px solid var(--line); padding:20px 16px;
+  font-size:13px; color:var(--muted); text-align:center;
+}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <span class="selo">Em construção</span>
+  <h1>Painel do Trader</h1>
+  <p class="sub">
+    Contexto do mercado brasileiro em uma tela só, para quem opera
+    mini índice (WIN) e mini dólar (WDO). Gratuito.
+  </p>
+
+  <div class="card">
+    <h2>Como está o projeto</h2>
+    <ol>
+      <li class="feito">Base: repositório e publicação automática <strong>— feito</strong></li>
+      <li>Site com dados de exemplo</li>
+      <li>Dados públicos (Banco Central, FRED, mercados globais)</li>
+      <li>Dados da B3</li>
+      <li>Resumos escritos por IA</li>
+      <li>Página de opções de BOVA11</li>
+      <li>Enquete, card do dia e alertas no Telegram</li>
+    </ol>
+  </div>
+</main>
+
+<footer>
+  Conteúdo informativo, não é recomendação de investimento.<br>
+  <a href="https://github.com/sabiaart/painel-do-trader">Código aberto no GitHub</a>
+</footer>
+</body>
+</html>
