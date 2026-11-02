@@ -1,0 +1,530 @@
+<title>Painel do Trader</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: terminal de contexto — coluna principal + coluna de anúncios que desce para baixo no celular */
+:root{
+  --bg:#0E1318; --panel:#151C23; --line:#26313B; --fg:#E4EAEF; --muted:#93A1AE;
+  --accent:#4FB8A0; --up:#4FB8A0; --down:#E8835A; --chip:#1C252E;
+  --display:"IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+  --bg:#F3F5F6; --panel:#FFFFFF; --line:#DCE2E7; --fg:#15202A; --muted:#566573;
+  --accent:#16806A; --up:#16806A; --down:#B8501F; --chip:#EAEFF2; color-scheme:light } }
+:root[data-theme="light"]{
+  --bg:#F3F5F6; --panel:#FFFFFF; --line:#DCE2E7; --fg:#15202A; --muted:#566573;
+  --accent:#16806A; --up:#16806A; --down:#B8501F; --chip:#EAEFF2; color-scheme:light }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)}
+.muted{color:var(--muted)}
+.label{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{max-width:1280px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:30px;height:30px;border-radius:7px;background:var(--accent);display:grid;place-items:center}
+.brand b{font-family:var(--display);font-size:19px;letter-spacing:.01em}
+.status{font-size:12px;display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+nav{width:100%;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;padding:8px 14px;border-radius:999px;background:var(--chip);color:var(--fg);text-decoration:none;font-size:13px;min-height:36px;display:inline-flex;align-items:center}
+nav a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.wrap{max-width:1280px;margin:0 auto;padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.sample{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.ad{border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-align:center}
+.ad-top{height:64px}
+.cols{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px}
+aside{flex:1 1 280px;display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+h2{font-family:var(--display);font-size:18px;font-weight:600;margin:0;text-wrap:balance}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+/* viés */
+.bias{display:flex;flex-wrap:wrap;gap:16px}
+.bias-score{flex:1 1 200px;display:flex;flex-direction:column;gap:8px}
+.bias-big{font-family:var(--display);font-size:34px;font-weight:700;line-height:1.1}
+.meter{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.meter span{height:8px;border-radius:2px;background:var(--line)}
+.meter span.on{background:var(--up)}
+.summary{flex:2 1 280px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.summary ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+button{font:inherit;font-size:14px;min-height:44px;padding:0 16px;border-radius:8px;cursor:pointer}
+.primary{background:var(--accent);color:var(--bg);border:none;font-weight:600}
+.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.tile .name{font-size:12px;color:var(--muted)}
+.tile .val{font-size:17px;font-weight:500}
+.tile .chg{font-size:13px}
+.tile .w{font-size:11px;color:var(--muted)}
+
+/* fluxo */
+.duo{display:flex;flex-wrap:wrap;gap:16px}
+.duo > .panel{flex:1 1 300px}
+.chart{width:100%;height:auto;display:block}
+.stats{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;margin-top:10px}
+.tablebox{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:6px 0}
+td{padding:10px 0;border-top:1px solid var(--line)}
+td.r,th.r{text-align:right}
+.read{font-size:13px;margin:10px 0 0;color:var(--muted)}
+.read b{color:var(--fg);font-weight:500}
+
+/* níveis */
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.kv div{display:flex;flex-direction:column}
+.kv span{font-size:12px;color:var(--muted)}
+.kv b{font-family:var(--mono);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
+
+/* agenda */
+.ev{display:grid;grid-template-columns:52px 1fr auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.ev:first-of-type{border-top:none}
+.ev .t{font-family:var(--mono);color:var(--muted);font-size:13px}
+.ev .hist{grid-column:2 / 4;font-size:12px;color:var(--muted)}
+.pill{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.pill.alto{color:var(--down)} .pill.medio{color:var(--muted)}
+
+/* movimento esperado */
+.exp{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.exp-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.track{position:relative;height:22px;border-radius:6px;background:var(--chip);overflow:hidden}
+.band2{position:absolute;top:0;bottom:0;left:4%;right:4%;background:var(--line)}
+.band1{position:absolute;top:0;bottom:0;left:27%;right:27%;background:var(--accent);opacity:.35}
+.mid{position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:var(--fg)}
+.ends{display:flex;justify-content:space-between;font-size:12px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.hit{font-size:12px;color:var(--muted)}
+/* sentimento */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.gauge{width:100%;max-width:260px;height:auto;display:block}
+.g-val{font-family:var(--display);font-size:30px;font-weight:700;line-height:1}
+.g-zone{font-size:14px;font-weight:600}
+.g-prev{font-size:12px;color:var(--muted)}
+.comps{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.comps li{display:grid;grid-template-columns:minmax(0,1fr) 90px 28px;gap:10px;align-items:center;font-size:13px}
+.cbar{height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
+.cbar i{display:block;height:100%;border-radius:3px}
+.comps .v{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--muted);font-size:12px}
+.ai-tag{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.split{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin:6px 0 4px}
+.split span{display:block}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
+.heads{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column}
+.heads li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;align-items:start}
+.tone{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid currentColor;margin-top:2px;white-space:nowrap}
+.tone.n{color:var(--muted)}
+/* calculadora, enquete, telegram */
+.btnlink{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:8px;text-decoration:none;font-size:14px}
+.calc-form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.segb{border:none;border-radius:0;background:transparent;color:var(--muted);min-width:64px}
+.segb.on{background:var(--chip);color:var(--fg);font-weight:600}
+.field{display:flex;flex-direction:column;gap:4px;flex:1 1 160px;font-size:12px;color:var(--muted)}
+.field input{font:inherit;font-family:var(--mono);font-size:18px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;min-height:44px;padding:0 12px;width:100%}
+.field input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.calc-out{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.mark{position:absolute;top:0;bottom:0;width:4px;margin-left:-2px;border-radius:2px;background:var(--down)}
+.zone{font-weight:600;font-size:15px}
+.zone.z1{color:var(--fg)} .zone.z2{color:var(--accent)} .zone.z3{color:var(--down)}
+.calc-msg{font-size:13px;color:var(--down);margin:8px 0 0}
+.calc-msg:empty{display:none}
+.tg{background:var(--chip);border-radius:12px 12px 12px 4px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;max-width:420px}
+.tg p{margin:0;font-size:14px}
+.moments{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.moments span{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.poll{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+.pollb{flex:1 1 100px;background:transparent;color:var(--fg);border:1px solid var(--line)}
+.pollb.on{border-color:var(--accent);background:var(--chip);font-weight:600}
+.you{font-style:normal;font-size:11px;color:var(--accent);margin-left:6px}
+/* opções bova11 */
+.gx-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.gx-stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.gx-stat span{font-size:12px;color:var(--muted)}
+.gx-stat b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:17px;font-weight:500}
+.gx-stat small{font-size:11px;color:var(--muted);line-height:1.4}
+.gxb{border:none;border-radius:0;background:transparent;color:var(--muted);min-width:64px;font-size:13px}
+.gxb.on{background:var(--chip);color:var(--fg);font-weight:600}
+.gx-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:12px 0 6px}
+.gx-chart{display:flex;flex-direction:column;gap:3px}
+.gx-row{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);align-items:center;gap:6px}
+.gx-l,.gx-r{height:12px;display:flex}
+.gx-l{justify-content:flex-end}
+.gx-l i,.gx-r i{display:block;height:100%;border-radius:2px}
+.gx-l i{background:var(--down)} .gx-r i{background:var(--up)}
+.gx-k{font-family:var(--mono);font-size:12px;text-align:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.gx-k.cw{color:var(--up);font-weight:600} .gx-k.pw{color:var(--down);font-weight:600}
+.gx-price{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--fg);font-family:var(--mono);margin:2px 0}
+.gx-price::before,.gx-price::after{content:"";flex:1;border-top:1px dashed var(--muted)}
+/* página de opções */
+section[id]{scroll-margin-top:130px}
+.ad-in{height:100px;margin-bottom:16px}
+.back{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);text-decoration:none;font-size:14px;font-weight:500}
+.howto{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.ad-side{height:250px}
+.partner{display:flex;flex-direction:column;gap:6px}
+footer{font-size:12px;color:var(--muted);line-height:1.6}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px}
+@media (min-width:900px){ .ad-top{height:90px} .ad-side.tall{height:600px} }
+@media (prefers-reduced-motion:no-preference){ .meter span.on{transition:background .3s} }
+</style>
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--bg)" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div>
+      <b>Painel do Trader</b>
+    </div>
+    <div class="status muted"><span class="dot" aria-hidden="true"></span><span>Pré-mercado · atraso 15 min</span></div>
+    <nav aria-label="Seções">
+      <a href="#pre">Pré-mercado</a><a href="#globais">Globais</a><a href="#sentimento">Sentimento</a><a href="#fluxo">Fluxo</a><a href="#niveis">Níveis</a><a href="#opcoes">Opções</a><a href="#calc">Calculadora</a><a href="#humor">Humor</a><a href="#agenda">Agenda</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="sample">Esboço com <b>dados de exemplo</b>. Nenhum número abaixo é real.</p>
+  <div class="ad ad-top">Anúncio · topo</div>
+
+  <div class="cols" id="page-home">
+  <main>
+    <section id="pre" class="panel">
+      <div class="bias">
+        <div class="bias-score">
+          <span class="label">Placar dos indicadores · WIN</span>
+          <span class="bias-big up">7 de 10</span>
+          <div class="meter" id="meter" aria-label="7 de 10 indicadores a favor da alta"></div>
+          <span class="muted" style="font-size:13px">indicadores do pré-mercado apontam para alta</span>
+        </div>
+        <div class="summary">
+          <span class="label">Resumo do dia</span>
+          <ul>
+            <li>Futuros de Nova York sobem e o EWZ avança no pré-mercado.</li>
+            <li>Minério firme em Dalian ajuda Vale; petróleo de lado.</li>
+            <li>Payroll às 10h30 pode virar o humor do pregão.</li>
+          </ul>
+          <div class="btns">
+            <button class="primary" id="share" type="button">Gerar card do dia</button>
+            <a class="ghost btnlink" href="#alertas">Alertas no Telegram</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="globais">
+      <div class="head"><h2>O que mexe hoje</h2><span class="muted" style="font-size:12px">peso no WIN</span></div>
+      <div class="tiles" id="tiles"></div>
+    </section>
+
+    <section id="sentimento" class="duo">
+      <div class="panel">
+        <div class="head"><h2>Termômetro do mercado</h2><span class="muted" style="font-size:12px">0 = medo · 100 = ganância</span></div>
+        <div class="gauge-wrap">
+          <svg class="gauge" id="gauge" viewBox="0 0 220 124" role="img" aria-label="Termômetro em 60 de 100, zona de ganância"></svg>
+          <span class="g-val num" id="gval">60</span>
+          <span class="g-zone up" id="gzone">Ganância</span>
+          <span class="g-prev">Ontem 54 · há 1 semana 41 · há 1 mês 33</span>
+        </div>
+        <ul class="comps" id="comps" aria-label="Componentes do termômetro"></ul>
+      </div>
+      <div class="panel">
+        <div class="head"><h2>Tom das notícias</h2><span class="ai-tag">Leitura por IA</span></div>
+        <span class="label">Saldo das manchetes de hoje</span>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><b class="g-val up" style="font-size:26px">Levemente positivo</b></div>
+        <div class="split" id="split" role="img" aria-label="7 positivas, 5 neutras, 4 negativas"></div>
+        <div class="legend"><span><b class="up">7</b> positivas</span><span><b>5</b> neutras</span><span><b class="down">4</b> negativas</span></div>
+        <ul class="heads" id="heads"></ul>
+        <p class="read">Separado do termômetro: classificação automática de manchetes, sujeita a erro.</p>
+      </div>
+    </section>
+
+    <section id="humor" class="panel">
+      <div class="head"><h2>Humor da comunidade</h2><span class="muted" style="font-size:12px" id="pollcount">votos de exemplo</span></div>
+      <span style="font-size:15px">Como você entra hoje no WIN?</span>
+      <div class="poll" role="group" aria-label="Seu posicionamento hoje">
+        <button type="button" class="pollb" data-o="c" aria-pressed="false">Comprado</button>
+        <button type="button" class="pollb" data-o="v" aria-pressed="false">Vendido</button>
+        <button type="button" class="pollb" data-o="f" aria-pressed="false">De fora</button>
+      </div>
+      <ul class="comps" id="pollres" aria-label="Resultado da enquete"></ul>
+      <p class="read">Sem certo ou errado: é o retrato de como a comunidade está posicionada. <b>Ontem 58% estavam comprados e o WIN fechou em queda de 0,4%.</b></p>
+    </section>
+
+    <section id="fluxo" class="duo">
+      <div class="panel">
+        <div class="head"><h2>Fluxo estrangeiro</h2><span class="muted" style="font-size:12px">R$ bi · 20 pregões</span></div>
+        <svg class="chart" id="flow" viewBox="0 0 320 150" role="img" aria-label="Fluxo estrangeiro diário dos últimos 20 pregões, dados de exemplo"></svg>
+        <div class="stats"><span class="muted">Ontem <b class="num up">+0,82</b></span><span class="muted">Mês <b class="num up">+3,4</b></span><span class="muted">Ano <b class="num down">−12,7</b></span></div>
+      </div>
+      <div class="panel">
+        <div class="head"><h2>Quem está comprado no WIN</h2></div>
+        <div class="tablebox"><table>
+          <thead><tr><th>Participante</th><th class="r">Saldo</th><th class="r">5 dias</th></tr></thead>
+          <tbody id="players"></tbody>
+        </table></div>
+        <p class="read">Leitura: <b>estrangeiro reduziu a posição vendida pelo 3º dia seguido.</b></p>
+      </div>
+    </section>
+
+    <section id="niveis" class="duo">
+      <div class="panel">
+        <div class="head"><h2>WIN · mini índice</h2><span class="pill medio">vence em 9 dias</span></div>
+        <div class="kv">
+          <div><span>Ajuste anterior</span><b>128.450</b></div>
+          <div><span>Gap previsto</span><b class="up">+320 pts</b></div>
+          <div><span>Máx. ontem</span><b>129.105</b></div>
+          <div><span>Mín. ontem</span><b>127.880</b></div>
+        </div>
+        <div class="exp">
+          <div class="exp-row"><span class="label">Movimento esperado hoje</span><b class="num">±1.375 pts</b></div>
+          <div class="track" role="img" aria-label="Faixa de 1 desvio entre 127.075 e 129.825; faixa de 2 desvios entre 125.700 e 131.200"><div class="band2"></div><div class="band1"></div><div class="mid"></div></div>
+          <div class="ends"><span>127.075</span><span class="muted">68% dos dias</span><span>129.825</span></div>
+          <span class="hit">2 desvios (95%): 125.700 a 131.200 · Faixa respeitada em 21 dos últimos 30 pregões</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="head"><h2>WDO · mini dólar</h2><span class="pill medio">vence em 30 dias</span></div>
+        <div class="kv">
+          <div><span>Ajuste anterior</span><b>5.412,5</b></div>
+          <div><span>Gap previsto</span><b class="down">−11,0</b></div>
+          <div><span>Máx. ontem</span><b>5.438,0</b></div>
+          <div><span>Mín. ontem</span><b>5.396,5</b></div>
+        </div>
+        <div class="exp">
+          <div class="exp-row"><span class="label">Movimento esperado hoje</span><b class="num">±41,0 pts</b></div>
+          <div class="track" role="img" aria-label="Faixa de 1 desvio entre 5.371,5 e 5.453,5; faixa de 2 desvios entre 5.330,5 e 5.494,5"><div class="band2"></div><div class="band1"></div><div class="mid"></div></div>
+          <div class="ends"><span>5.371,5</span><span class="muted">68% dos dias</span><span>5.453,5</span></div>
+          <span class="hit">Dia de Payroll: faixa ampliada em 30% · Respeitada em 22 dos últimos 30 pregões</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="head"><h2>Opções de BOVA11</h2><span class="pill medio">vence 20/11</span></div>
+      <p style="margin:0 0 12px">O mercado de opções está em <b class="up">gamma positivo</b>, com a maior concentração de calls no strike 128.</p>
+      <a class="primary btnlink" href="#opcoes">Ver contratos em aberto, GEX e gamma flip</a>
+    </section>
+
+    <section id="calc" class="panel">
+      <div class="head"><h2>Onde o preço está na faixa</h2><span class="muted" style="font-size:12px">você informa o preço</span></div>
+      <p class="muted" style="margin:0 0 12px;font-size:14px">Digite o preço que aparece na sua plataforma. O cálculo usa o ajuste anterior e o movimento esperado de hoje.</p>
+      <div class="calc-form">
+        <div class="seg" role="group" aria-label="Ativo">
+          <button type="button" class="segb on" data-a="win" aria-pressed="true">WIN</button>
+          <button type="button" class="segb" data-a="wdo" aria-pressed="false">WDO</button>
+        </div>
+        <label class="field" for="price"><span>Preço atual</span><input id="price" inputmode="decimal" autocomplete="off" value="129.200"></label>
+      </div>
+      <p class="calc-msg" id="calcmsg"></p>
+      <div class="calc-out" id="calcout">
+        <div class="exp-row"><span class="label">Movimento esperado percorrido</span><b class="num" id="pct">55%</b></div>
+        <div class="track" role="img" aria-label="Posição do preço em relação às faixas de 1 e 2 desvios"><div class="band2"></div><div class="band1"></div><div class="mid"></div><div class="mark" id="mark" style="left:62%"></div></div>
+        <div class="ends"><span id="e-lo">125.700</span><span class="muted">ajuste no centro</span><span id="e-hi">131.200</span></div>
+        <span class="zone z1" id="zone">Dentro da faixa de 1 desvio</span>
+        <span class="muted" style="font-size:13px" id="disp"></span>
+        <span class="hit" id="next"></span>
+      </div>
+      <p class="read">No fechamento: <b>ontem o WIN percorreu 118% do movimento esperado.</b></p>
+    </section>
+
+    <section id="alertas" class="panel">
+      <div class="head"><h2>Alertas no Telegram</h2><span class="muted" style="font-size:12px">grátis · até 4 por dia</span></div>
+      <div class="tg">
+        <span class="label">Exemplo de alerta</span>
+        <p>WIN rompeu a faixa de 1 desvio. Veja o que aconteceu nos dias parecidos com hoje.</p>
+        <span class="muted" style="font-size:12px">[seusite].com.br/hoje</span>
+      </div>
+      <div class="moments"><span>Abertura</span><span>Eventos da agenda</span><span>Rompimento de faixa</span><span>Fechamento</span></div>
+      <button class="primary" id="tg" type="button">Entrar no canal</button>
+    </section>
+
+    <section id="agenda" class="panel">
+      <div class="head"><h2>Agenda que move o mercado</h2><span class="muted" style="font-size:12px">horário de Brasília</span></div>
+      <div id="events"></div>
+    </section>
+  </main>
+
+  <aside aria-label="Publicidade e parceiros">
+    <div class="ad ad-side tall">Anúncio · lateral</div>
+    <div class="panel partner">
+      <span class="label">Parceiro</span>
+      <b style="font-family:var(--display);font-size:17px">[Corretora parceira]</b>
+      <span class="muted" style="font-size:13px">Espaço para afiliado: corretagem zero no mini índice.</span>
+    </div>
+    <div class="ad ad-side">Anúncio · 300×250</div>
+  </aside>
+  </div>
+
+  <div class="cols" id="page-opcoes" hidden>
+  <main>
+    <a class="back" href="#pre">← Voltar ao painel</a>
+    <section id="gex" class="panel">
+      <div class="head"><h2>Opções de BOVA11 · vencimento mensal</h2><span class="muted" style="font-size:12px">vence 20/11 · fechamento de ontem</span></div>
+      <div class="gx-stats" id="gxstats"></div>
+      <div class="ad ad-in">Anúncio · no conteúdo</div>
+      <div class="head" style="margin:0"><span class="label" id="gxtitle">Contratos em aberto por strike</span><div class="seg" role="group" aria-label="Visualização"><button type="button" class="gxb on" data-m="oi" aria-pressed="true">Em aberto</button><button type="button" class="gxb" data-m="gex" aria-pressed="false">GEX</button></div></div>
+      <div class="gx-legend"><span id="gxl">◄ Puts</span><span id="gxr">Calls ►</span></div>
+      <div class="gx-chart" id="gxchart" role="img"></div>
+      <p class="read">Níveis convertidos para pontos do Ibovespa pela relação do dia (BOVA11 × 1.030). O GEX supõe formadores de mercado vendidos em calls e comprados em puts: use como zonas de interesse, não como suporte ou resistência garantidos.</p>
+    </section>
+    <section class="panel">
+      <div class="head"><h2>Como ler esta página</h2></div>
+      <ul class="howto">
+        <li><b>Call wall</b> é o strike com mais gamma de calls. Costuma atrair atenção como zona acima do preço.</li>
+        <li><b>Put wall</b> é o equivalente nas puts, abaixo do preço.</li>
+        <li><b>Gamma flip</b> é o preço em que o GEX total muda de sinal. Acima dele, as oscilações tendem a ser amortecidas. Abaixo, ampliadas.</li>
+        <li>Os dados são do fechamento anterior e mudam a cada pregão, principalmente perto do vencimento.</li>
+      </ul>
+    </section>
+  </main>
+
+  <aside aria-label="Publicidade">
+    <div class="ad ad-side tall">Anúncio · lateral</div>
+    <div class="ad ad-side">Anúncio · 300×250</div>
+  </aside>
+  </div>
+
+  <footer>Conteúdo informativo, não é recomendação de investimento. Cotações da B3 com atraso mínimo de 15 minutos. Fontes previstas: B3 (arquivos públicos), Banco Central, APIs de mercados globais.</footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const tiles=[
+ ["S&P 500 fut.","5.912","+0,42","alto"],["Nasdaq fut.","20.840","+0,61","médio"],
+ ["EWZ","28,74","+0,85","alto"],["Vale ADR","10,12","+1,30","alto"],
+ ["Petrobras ADR","14,05","−0,20","médio"],["Itaú ADR","6,41","+0,47","médio"],
+ ["Minério Dalian","812","+1,10","médio"],["Brent","73,40","−0,15","médio"],
+ ["DXY","104,2","−0,18","alto"],["Treasury 10a","4,31%","−2 bps","alto"]];
+document.getElementById("tiles").innerHTML=tiles.map(([n,v,c,w])=>{
+  const neg=c.startsWith("−");
+  return `<div class="tile"><span class="name">${n}</span><span class="val num">${v}</span><span class="chg num ${neg?"down":"up"}">${neg?"▼":"▲"} ${c.replace("−","")}${c.includes("bps")?"":"%"}</span><span class="w">peso ${w}</span></div>`}).join("");
+
+const m=document.getElementById("meter");
+for(let i=0;i<10;i++){const s=document.createElement("span");if(i<7)s.className="on";m.appendChild(s)}
+
+const flow=[0.4,1.1,-0.6,0.9,1.4,-0.8,-1.2,0.3,0.2,-0.9,1.0,1.6,-0.4,0.6,-0.2,0.8,-1.5,0.4,0.5,0.82];
+const svg=document.getElementById("flow"),W=320,H=150,pad=22,mid=H/2,max=2,bw=(W-pad)/flow.length;
+let g=`<line x1="${pad}" x2="${W}" y1="${mid}" y2="${mid}" stroke="var(--line)"/>`;
+[2,-2].forEach(v=>{const y=mid-v/max*(mid-10);g+=`<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="0" y="${y+4}" font-size="10" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${v>0?"+2":"−2"}</text>`});
+g+=`<text x="8" y="${mid+4}" font-size="10" fill="var(--muted)" font-family="IBM Plex Mono, monospace">0</text>`;
+flow.forEach((v,i)=>{const h=Math.abs(v)/max*(mid-10),x=pad+i*bw+2,y=v>=0?mid-h:mid;
+  g+=`<rect x="${x}" y="${y}" width="${bw-4}" height="${h}" rx="1.5" fill="${v>=0?"var(--up)":"var(--down)"}" opacity="${i===flow.length-1?1:.75}"/>`});
+svg.innerHTML=g;
+
+const players=[["Estrangeiro","−42.310","▲","up"],["Institucional","+18.940","▼","down"],["Pessoa física","+21.770","▲","up"],["Inst. financeira","+1.600","▼","down"]];
+document.getElementById("players").innerHTML=players.map(([n,s,d,c])=>`<tr><td>${n}</td><td class="r num">${s}</td><td class="r ${c}">${d}</td></tr>`).join("");
+
+const ev=[["08:00","Boletim Focus","medio","WIN ±0,1% em média"],["10:30","Payroll (EUA)","alto","WIN ±0,9% em média no dia"],["14:30","Fala de diretor do Fed","medio","WIN ±0,3% em média"]];
+document.getElementById("events").innerHTML=ev.map(([t,n,i,h])=>`<div class="ev"><span class="t">${t}</span><span>${n}</span><span class="pill ${i}">${i==="alto"?"Alto":"Médio"}</span><span class="hist">Histórico: ${h}</span></div>`).join("");
+
+const comps=[["Momento do Ibovespa",71],["Amplitude das ações",58],["Volatilidade (VIX Ibov)",64],["Fluxo estrangeiro 5d",69],["Posição estrangeiro no WIN",40],["Proteção (put/call)",55],["Porto seguro (dólar)",66]];
+const zoneColor=v=>v<45?"var(--down)":v>55?"var(--up)":"var(--muted)";
+document.getElementById("comps").innerHTML=comps.map(([n,v])=>`<li><span>${n}</span><span class="cbar"><i style="width:${v}%;background:${zoneColor(v)}"></i></span><span class="v">${v}</span></li>`).join("");
+const gv=Math.round(comps.reduce((a,[,v])=>a+v,0)/comps.length);
+(function(){const cx=110,cy=112,r=92,sw=16,gs=document.getElementById("gauge");
+ const pt=(v,rr)=>{const a=Math.PI*(1-v/100);return [cx+rr*Math.cos(a),cy-rr*Math.sin(a)]};
+ const arc=(a,b,col,op)=>{const[x1,y1]=pt(a,r),[x2,y2]=pt(b,r);return `<path d="M${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2}" fill="none" stroke="${col}" stroke-width="${sw}" opacity="${op}"/>`};
+ let s="";[[0,24.5,"var(--down)",.9],[25.5,44.5,"var(--down)",.45],[45.5,54.5,"var(--line)",1],[55.5,74.5,"var(--up)",.45],[75.5,100,"var(--up)",.9]].forEach(z=>s+=arc(...z));
+ const[nx,ny]=pt(gv,r-26);s+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--fg)" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="6" fill="var(--fg)"/>`;
+ s+=`<text x="6" y="122" font-size="10" fill="var(--muted)" font-family="IBM Plex Sans, sans-serif">Medo extremo</text><text x="214" y="122" text-anchor="end" font-size="10" fill="var(--muted)" font-family="IBM Plex Sans, sans-serif">Ganância extrema</text>`;
+ gs.innerHTML=s;
+ const zone=gv<25?"Medo extremo":gv<45?"Medo":gv<=55?"Neutro":gv<=75?"Ganância":"Ganância extrema";
+ document.getElementById("gval").textContent=gv;const z=document.getElementById("gzone");z.textContent=zone;z.style.color=zoneColor(gv);
+ gs.setAttribute("aria-label",`Termômetro em ${gv} de 100, zona: ${zone}`);})();
+
+document.getElementById("split").innerHTML=`<span style="flex:7;background:var(--up)"></span><span style="flex:5;background:var(--line)"></span><span style="flex:4;background:var(--down)"></span>`;
+const heads=[["p","Positiva","China anuncia estímulo à construção e minério sobe em Dalian"],["x","Negativa","Arrecadação abaixo do esperado reacende dúvida fiscal"],["n","Neutra","Focus mantém projeção de inflação para o ano"],["p","Positiva","Estrangeiro volta a comprar ações brasileiras na semana"]];
+document.getElementById("heads").innerHTML=heads.map(([k,t,h])=>`<li><span class="tone ${k==="p"?"up":k==="x"?"down":"n"}">${t}</span><span>${h}</span></li>`).join("");
+
+const toast=document.getElementById("toast");let tt;
+function show(msg){toast.textContent=msg;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2400)}
+document.getElementById("share").addEventListener("click",()=>show("No produto final, isto gera a imagem do dia para compartilhar."));
+document.getElementById("tg").addEventListener("click",()=>show("No produto final, isto abre o canal do Telegram."));
+
+const fmt=(v,d)=>v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const parse=s=>{s=String(s).trim().replace(/\s/g,"");if(!s)return NaN;if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,"");return parseFloat(s)};
+const assets={win:{aj:128450,sd:1375,dec:0,ex:"129.200"},wdo:{aj:5412.5,sd:41,dec:1,ex:"5.436,0"}};
+let cur="win";
+function calc(){
+  const a=assets[cur],p=parse(document.getElementById("price").value),out=document.getElementById("calcout"),msg=document.getElementById("calcmsg");
+  if(!isFinite(p)||p<=0){msg.textContent="Digite um preço, por exemplo "+a.ex+".";out.hidden=true;return}
+  msg.textContent="";out.hidden=false;
+  const d=p-a.aj,z=d/a.sd,az=Math.abs(z);
+  document.getElementById("pct").textContent=fmt(Math.round(az*100),0)+"%";
+  document.getElementById("mark").style.left=Math.min(98,Math.max(2,50+23*z))+"%";
+  document.getElementById("disp").textContent=(d>=0?"+":"−")+fmt(Math.abs(d),a.dec)+" pts desde o ajuste ("+fmt(a.aj,a.dec)+")";
+  const zEl=document.getElementById("zone");
+  if(az<=1){zEl.textContent="Dentro da faixa de 1 desvio";zEl.className="zone z1"}
+  else if(az<=2){zEl.textContent="Entre 1 e 2 desvios";zEl.className="zone z2"}
+  else{zEl.textContent="Além de 2 desvios · esticado";zEl.className="zone z3"}
+  const dir=d>=0?1:-1,b1=a.aj+dir*a.sd,b2=a.aj+dir*2*a.sd;
+  document.getElementById("next").textContent=az<1?"Faltam "+fmt(Math.abs(b1-p),a.dec)+" pts para a faixa de 1 desvio ("+fmt(b1,a.dec)+")":az<2?"Faltam "+fmt(Math.abs(b2-p),a.dec)+" pts para a faixa de 2 desvios ("+fmt(b2,a.dec)+")":"Já passou "+fmt(Math.abs(p-b2),a.dec)+" pts da faixa de 2 desvios ("+fmt(b2,a.dec)+")";
+  document.getElementById("e-lo").textContent=fmt(a.aj-2*a.sd,a.dec);
+  document.getElementById("e-hi").textContent=fmt(a.aj+2*a.sd,a.dec);
+}
+document.querySelectorAll(".segb").forEach(b=>b.addEventListener("click",()=>{cur=b.dataset.a;document.querySelectorAll(".segb").forEach(x=>{const on=x===b;x.classList.toggle("on",on);x.setAttribute("aria-pressed",on)});document.getElementById("price").value=assets[cur].ex;calc()}));
+document.getElementById("price").addEventListener("input",calc);
+calc();
+
+const poll={c:616,v:398,f:270},names={c:"Comprado",v:"Vendido",f:"De fora"};
+let mine=null;try{mine=localStorage.getItem("humor-voto")}catch(e){}
+function renderPoll(){
+  const t=poll.c+poll.v+poll.f+(mine?1:0);
+  document.getElementById("pollres").innerHTML=["c","v","f"].map(k=>{const n=poll[k]+(mine===k?1:0),p=Math.round(n/t*100);return `<li><span>${names[k]}${mine===k?"<em class=\"you\">seu voto</em>":""}</span><span class="cbar"><i style="width:${p}%;background:${k==="c"?"var(--up)":k==="v"?"var(--down)":"var(--muted)"}"></i></span><span class="v">${p}%</span></li>`}).join("");
+  document.getElementById("pollcount").textContent=fmt(t,0)+" votos de exemplo";
+  document.querySelectorAll(".pollb").forEach(b=>{const on=b.dataset.o===mine;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
+}
+document.querySelectorAll(".pollb").forEach(b=>b.addEventListener("click",()=>{mine=b.dataset.o;try{localStorage.setItem("humor-voto",mine)}catch(e){}renderPoll();show("Voto registrado. Volte no fechamento para ver o resultado.")}));
+renderPoll();
+
+const gx={S:124.2,T:14/252,iv:0.19,r:0.1075,ratio:1030,rows:[[118,20000,380000],[119,15000,220000],[120,40000,610000],[121,30000,290000],[122,80000,330000],[123,120000,180000],[124,250000,150000],[125,310000,90000],[126,440000,60000],[127,280000,30000],[128,520000,40000],[129,190000,15000],[130,360000,20000]]};
+const npdf=x=>Math.exp(-x*x/2)/Math.sqrt(2*Math.PI);
+const gam=(S,K)=>{const vt=gx.iv*Math.sqrt(gx.T),d1=(Math.log(S/K)+(gx.r+gx.iv*gx.iv/2)*gx.T)/vt;return npdf(d1)/(S*vt)};
+const gexAt=(S,K,c,p)=>(c-p)*gam(S,K)*S*S*0.01;
+const gexTotal=S=>gx.rows.reduce((a,[K,c,p])=>a+gexAt(S,K,c,p),0);
+const cw=gx.rows.reduce((b,r)=>r[1]*gam(gx.S,r[0])>b[1]*gam(gx.S,b[0])?r:b)[0];
+const pw=gx.rows.reduce((b,r)=>r[2]*gam(gx.S,r[0])>b[2]*gam(gx.S,b[0])?r:b)[0];
+let flip=null;{let best=Infinity,prev=gexTotal(110);for(let s=110.05;s<=140;s+=0.05){const v=gexTotal(s);if((prev<0)!==(v<0)&&Math.abs(s-gx.S)<best){best=Math.abs(s-gx.S);flip=s}prev=v}}
+const tot=gexTotal(gx.S);
+const stat=(n,k,s)=>`<div class="gx-stat"><span>${n}</span><b>${k==null?"—":fmt(k,k%1?2:0)}</b><small>${k==null?s:"≈ "+fmt(Math.round(k*gx.ratio),0)+" pts · "+s}</small></div>`;
+document.getElementById("gxstats").innerHTML=stat("Call wall",cw,"maior gamma de calls")+stat("Put wall",pw,"maior gamma de puts")+stat("Gamma flip",flip,"onde o GEX troca de sinal")+`<div class="gx-stat"><span>GEX total</span><b class="${tot>=0?"up":"down"}">${tot>=0?"+":"−"}R$ ${fmt(Math.abs(tot)/1e6,1)} mi</b><small>por 1% de variação · ${tot>=0?"gamma positivo: oscilação tende a ser amortecida":"gamma negativo: oscilação tende a ser ampliada"}</small></div>`;
+function renderGex(mode){
+  const data=[...gx.rows].reverse().map(([K,c,p])=>({K,c,p,g:gexAt(gx.S,K,c,p)}));
+  const max=mode==="oi"?Math.max(...data.map(d=>Math.max(d.c,d.p))):Math.max(...data.map(d=>Math.abs(d.g)));
+  let html="",done=false;
+  data.forEach(d=>{
+    if(!done&&d.K<gx.S){html+=`<div class="gx-price"><span>preço ${fmt(gx.S,2)}</span></div>`;done=true}
+    const L=mode==="oi"?d.p:Math.max(0,-d.g),R=mode==="oi"?d.c:Math.max(0,d.g);
+    const tag=d.K===cw?" cw":d.K===pw?" pw":"";
+    const tip=mode==="oi"?`${d.K}: ${fmt(d.p,0)} puts, ${fmt(d.c,0)} calls`:`${d.K}: GEX ${d.g>=0?"+":"−"}R$ ${fmt(Math.abs(d.g)/1e3,0)} mil`;
+    html+=`<div class="gx-row" title="${tip}"><div class="gx-l"><i style="width:${(L/max*100).toFixed(1)}%"></i></div><span class="gx-k${tag}">${d.K}</span><div class="gx-r"><i style="width:${(R/max*100).toFixed(1)}%"></i></div></div>`;
+  });
+  const ch=document.getElementById("gxchart");ch.innerHTML=html;
+  ch.setAttribute("aria-label",mode==="oi"?`Contratos em aberto por strike de 118 a 130. Maior concentração de puts em ${pw} e de calls em ${cw}.`:`GEX por strike de 118 a 130. Total ${tot>=0?"positivo":"negativo"}.`);
+  document.getElementById("gxtitle").textContent=mode==="oi"?"Contratos em aberto por strike":"GEX por strike (R$ por 1%)";
+  document.getElementById("gxl").textContent=mode==="oi"?"◄ Puts":"◄ Gamma negativo";
+  document.getElementById("gxr").textContent=mode==="oi"?"Calls ►":"Gamma positivo ►";
+  document.querySelectorAll(".gxb").forEach(b=>{const on=b.dataset.m===mode;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
+}
+document.querySelectorAll(".gxb").forEach(b=>b.addEventListener("click",()=>renderGex(b.dataset.m)));
+renderGex("oi");
+
+const pHome=document.getElementById("page-home"),pOpc=document.getElementById("page-opcoes");
+function route(){
+  const h=location.hash.slice(1),isOpc=h==="opcoes"||h==="gex";
+  pHome.hidden=isOpc;pOpc.hidden=!isOpc;
+  if(isOpc){window.scrollTo(0,0)}else if(h){const el=document.getElementById(h);if(el)el.scrollIntoView()}
+}
+window.addEventListener("hashchange",route);route();
+</script>
