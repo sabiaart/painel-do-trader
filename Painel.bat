@@ -68,7 +68,7 @@ echo   ------------------------------------------------
 echo.
 
 start "" http://localhost:8787
-%PY% -m http.server 8787 --directory site --bind 127.0.0.1
+%PY% pipeline\servidor.py 8787
 
 rem Se o servidor cair sozinho, a janela nao some antes de voce ler o erro.
 echo.

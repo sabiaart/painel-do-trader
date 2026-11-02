@@ -1,8 +1,51 @@
-{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
-"favoraveis":7,"total":10,
-"indicadores":[
-{"nome":"S&P 500 fut.","favoravel":true},{"nome":"Nasdaq fut.","favoravel":true},
-{"nome":"EWZ","favoravel":true},{"nome":"Vale ADR","favoravel":true},
-{"nome":"Petrobras ADR","favoravel":false},{"nome":"Itaú ADR","favoravel":true},
-{"nome":"Minério Dalian","favoravel":true},{"nome":"Brent","favoravel":false},
-{"nome":"DXY","favoravel":true},{"nome":"Treasury 10a","favoravel":false}]}
+{
+ "gerado_em": "2026-11-02T16:55:01-03:00",
+ "origem": "Alpha Vantage (fechamento do pregão anterior)",
+ "exemplo": false,
+ "desatualizado": false,
+ "favoraveis": 6,
+ "total": 10,
+ "pregao": "2026-10-30",
+ "indicadores": [
+  {
+   "nome": "S&P 500 (SPY)",
+   "favoravel": false
+  },
+  {
+   "nome": "Nasdaq 100 (QQQ)",
+   "favoravel": false
+  },
+  {
+   "nome": "Brasil (EWZ)",
+   "favoravel": false
+  },
+  {
+   "nome": "Vale ADR",
+   "favoravel": true
+  },
+  {
+   "nome": "Petrobras ADR",
+   "favoravel": true
+  },
+  {
+   "nome": "Itaú ADR",
+   "favoravel": false
+  },
+  {
+   "nome": "Dólar (UUP)",
+   "favoravel": true
+  },
+  {
+   "nome": "Petróleo Brent (BNO)",
+   "favoravel": true
+  },
+  {
+   "nome": "Treasury 7-10a (IEF)",
+   "favoravel": true
+  },
+  {
+   "nome": "China (FXI)",
+   "favoravel": true
+  }
+ ]
+}

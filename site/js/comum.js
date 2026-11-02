@@ -49,6 +49,28 @@ export function marcarOrigem(dados, elId = "aviso-exemplo") {
   el.hidden = false;
 }
 
+/* Marca UM bloco como dado de exemplo.
+   A pagina hoje e mista: uns blocos ja tem dado real, outros nao. Um aviso
+   so no topo mentiria para os dois lados, entao cada bloco diz o que e. */
+export function marcarBloco(dados, id) {
+  const bloco = document.getElementById(id);
+  if (!bloco || !dados) return false;
+  if (!dados.exemplo && !dados.desatualizado) return false;
+
+  const selo = document.createElement("span");
+  selo.className = "tag-exemplo";
+  selo.textContent = dados.desatualizado ? "dado antigo" : "exemplo";
+  selo.title = dados.desatualizado
+    ? "A fonte não respondeu. Este bloco mostra o último dado válido."
+    : "Este bloco ainda não tem dado real.";
+
+  /* Entra ao lado do titulo quando existe um; senao, no topo do bloco. */
+  const cabecalho = bloco.querySelector(".head") || bloco.querySelector(".label")?.parentElement;
+  if (cabecalho) cabecalho.appendChild(selo);
+  else bloco.prepend(selo);
+  return true;
+}
+
 /* Mostra uma mensagem curta no rodape da tela. */
 export function aviso(msg) {
   const t = document.getElementById("toast");

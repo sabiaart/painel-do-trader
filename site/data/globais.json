@@ -1,12 +1,120 @@
-{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
-"ativos":[
-{"nome":"S&P 500 fut.","valor":"5.912","variacao":0.42,"unidade":"%","peso":"alto"},
-{"nome":"Nasdaq fut.","valor":"20.840","variacao":0.61,"unidade":"%","peso":"médio"},
-{"nome":"EWZ","valor":"28,74","variacao":0.85,"unidade":"%","peso":"alto"},
-{"nome":"Vale ADR","valor":"10,12","variacao":1.30,"unidade":"%","peso":"alto"},
-{"nome":"Petrobras ADR","valor":"14,05","variacao":-0.20,"unidade":"%","peso":"médio"},
-{"nome":"Itaú ADR","valor":"6,41","variacao":0.47,"unidade":"%","peso":"médio"},
-{"nome":"Minério Dalian","valor":"812","variacao":1.10,"unidade":"%","peso":"médio"},
-{"nome":"Brent","valor":"73,40","variacao":-0.15,"unidade":"%","peso":"médio"},
-{"nome":"DXY","valor":"104,2","variacao":-0.18,"unidade":"%","peso":"alto"},
-{"nome":"Treasury 10a","valor":"4,31%","variacao":-2,"unidade":"bps","peso":"alto"}]}
+{
+ "gerado_em": "2026-11-02T16:55:01-03:00",
+ "origem": "Alpha Vantage (fechamento do pregão anterior)",
+ "exemplo": false,
+ "desatualizado": false,
+ "ativos": [
+  {
+   "nome": "S&P 500 (SPY)",
+   "valor": "755,72",
+   "variacao": -1.77,
+   "unidade": "%",
+   "peso": "alto",
+   "favoravel": false,
+   "inverte": false,
+   "substitui": "futuro do S&P 500",
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Nasdaq 100 (QQQ)",
+   "valor": "690,49",
+   "variacao": -3.47,
+   "unidade": "%",
+   "peso": "médio",
+   "favoravel": false,
+   "inverte": false,
+   "substitui": "futuro do Nasdaq",
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Brasil (EWZ)",
+   "valor": "32,46",
+   "variacao": -2.05,
+   "unidade": "%",
+   "peso": "alto",
+   "favoravel": false,
+   "inverte": false,
+   "substitui": null,
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Vale ADR",
+   "valor": "11,39",
+   "variacao": 1.88,
+   "unidade": "%",
+   "peso": "alto",
+   "favoravel": true,
+   "inverte": false,
+   "substitui": null,
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Petrobras ADR",
+   "valor": "22,05",
+   "variacao": 0.68,
+   "unidade": "%",
+   "peso": "médio",
+   "favoravel": true,
+   "inverte": false,
+   "substitui": null,
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Itaú ADR",
+   "valor": "7,13",
+   "variacao": -3.26,
+   "unidade": "%",
+   "peso": "médio",
+   "favoravel": false,
+   "inverte": false,
+   "substitui": null,
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Dólar (UUP)",
+   "valor": "29,00",
+   "variacao": -0.14,
+   "unidade": "%",
+   "peso": "alto",
+   "favoravel": true,
+   "inverte": true,
+   "substitui": "DXY",
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Petróleo Brent (BNO)",
+   "valor": "71,39",
+   "variacao": 0.89,
+   "unidade": "%",
+   "peso": "médio",
+   "favoravel": true,
+   "inverte": false,
+   "substitui": "Brent à vista",
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "Treasury 7-10a (IEF)",
+   "valor": "91,76",
+   "variacao": 0.56,
+   "unidade": "%",
+   "peso": "alto",
+   "favoravel": true,
+   "inverte": false,
+   "substitui": "juro do Treasury de 10 anos",
+   "data": "2026-10-30"
+  },
+  {
+   "nome": "China (FXI)",
+   "valor": "33,08",
+   "variacao": 1.19,
+   "unidade": "%",
+   "peso": "médio",
+   "favoravel": true,
+   "inverte": false,
+   "substitui": "minério em Dalian",
+   "data": "2026-10-30"
+  }
+ ],
+ "pregao": "2026-10-30",
+ "falhas": []
+}

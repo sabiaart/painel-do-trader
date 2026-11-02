@@ -2,15 +2,23 @@
    Cada bloco le o seu proprio JSON de site/data/ e se vira sozinho:
    se um arquivo falhar, os outros blocos continuam funcionando. */
 
-import { fmt, parsePreco, carregar, marcarOrigem, aviso, semDado } from "./comum.js";
+import { fmt, parsePreco, carregar, marcarBloco, aviso, semDado } from "./comum.js";
 
 const $ = (id) => document.getElementById(id);
+
+/* Quais blocos ainda sao exemplo. O aviso do topo sai daqui. */
+const situacao = { exemplo: [], real: [] };
+function registrar(nome, dados, idDoBloco) {
+  if (!dados) return;
+  situacao[dados.exemplo || dados.desatualizado ? "exemplo" : "real"].push(nome);
+  marcarBloco(dados, idDoBloco);
+}
 
 /* ---------------- 4.1 Placar dos indicadores ---------------- */
 async function placar() {
   const d = await carregar("placar");
   if (!d) return semDado($("pre"), "o placar");
-  marcarOrigem(d);
+  registrar("placar", d, "pre");
   const num = $("placar-num");
   num.textContent = `${d.favoraveis} de ${d.total}`;
   num.className = "bias-big " + (d.favoraveis > d.total / 2 ? "up" : "down");
@@ -29,6 +37,7 @@ async function resumo() {
   const d = await carregar("resumo");
   const ul = $("resumo-lista");
   if (!d) return semDado(ul.parentElement, "o resumo do dia");
+  registrar("resumo", d, "bloco-resumo");
   ul.innerHTML = d.linhas.map((l) => `<li>${l}</li>`).join("");
 }
 
@@ -37,6 +46,7 @@ async function globais() {
   const d = await carregar("globais");
   const alvo = $("tiles");
   if (!d) return semDado(alvo, "os mercados globais");
+  registrar("globais", d, "globais");
   alvo.innerHTML = d.ativos
     .map((a) => {
       const neg = a.variacao < 0;
@@ -63,6 +73,7 @@ const nomeZona = (v) =>
 async function termometro() {
   const d = await carregar("termometro");
   if (!d) return semDado($("bloco-termometro"), "o termômetro");
+  registrar("termômetro", d, "bloco-termometro");
 
   $("comps").innerHTML = d.componentes
     .map(
@@ -109,6 +120,7 @@ async function termometro() {
 async function noticias() {
   const d = await carregar("noticias");
   if (!d) return semDado($("bloco-noticias"), "o tom das notícias");
+  registrar("notícias", d, "bloco-noticias");
   $("news-saldo").textContent = d.saldo;
 
   const split = $("split");
@@ -134,6 +146,7 @@ async function noticias() {
 async function enquete() {
   const d = await carregar("enquete");
   if (!d) return semDado($("humor"), "a enquete");
+  registrar("enquete", d, "humor");
 
   const nomes = { c: "Comprado", v: "Vendido", f: "De fora" };
   const cores = { c: "var(--up)", v: "var(--down)", f: "var(--muted)" };
@@ -188,6 +201,7 @@ async function enquete() {
 async function fluxo() {
   const d = await carregar("fluxo");
   if (!d) return semDado($("bloco-fluxo"), "o fluxo estrangeiro");
+  registrar("fluxo", d, "bloco-fluxo");
 
   const svg = $("flow"), W = 320, H = 150, pad = 22, meio = H / 2;
   const max = Math.max(2, ...d.pregoes.map((v) => Math.abs(v)));
@@ -225,6 +239,7 @@ async function fluxo() {
 async function participantes() {
   const d = await carregar("participantes");
   if (!d) return semDado($("bloco-participantes"), "as posições por participante");
+  registrar("participantes", d, "bloco-participantes");
 
   $("players").innerHTML = d.participantes
     .map((p) => {
@@ -245,6 +260,8 @@ async function niveis() {
     semDado($("calc"), "a calculadora");
     return;
   }
+
+  registrar("níveis", d, "niveis");
 
   for (const chave of ["win", "wdo"]) {
     const a = d.ativos[chave], c = a.casas;
@@ -367,6 +384,7 @@ async function agenda() {
   const d = await carregar("agenda");
   const alvo = $("events");
   if (!d) return semDado(alvo, "a agenda");
+  registrar("agenda", d, "agenda");
   $("agenda-fuso").textContent = d.fuso;
   alvo.innerHTML = d.eventos
     .map(
@@ -386,5 +404,23 @@ function botoes() {
 Promise.allSettled([
   placar(), resumo(), globais(), termometro(), noticias(),
   enquete(), fluxo(), participantes(), niveis(), agenda(),
-]);
+]).then(() => {
+  /* Um aviso honesto sobre uma pagina mista: diz quanto ja e real e
+     manda olhar o selo de cada bloco, em vez de generalizar. */
+  const el = $("aviso-exemplo");
+  if (!el) return;
+  const nReal = situacao.real.length;
+  const nExemplo = situacao.exemplo.length;
+  if (nExemplo === 0 && nReal > 0) {
+    el.innerHTML = "Todos os blocos desta página estão com <b>dados reais</b>.";
+  } else if (nReal === 0) {
+    el.innerHTML = "Esta página mostra <b>dados de exemplo</b>. Nenhum número é real.";
+  } else {
+    el.innerHTML =
+      `<b>${nReal} de ${nReal + nExemplo} blocos</b> já estão com dados reais ` +
+      `(${situacao.real.join(", ")}). Os demais ainda são exemplo e estão marcados ` +
+      `com o selo <span class="tag-exemplo" style="margin:0">exemplo</span>.`;
+  }
+  el.hidden = false;
+});
 botoes();

@@ -10,6 +10,7 @@ termina com erro se TODAS as fontes falharem - nesse caso vale avisar.
 from __future__ import annotations
 
 import sys
+import time
 from datetime import date
 
 import calculos
@@ -18,6 +19,7 @@ import fontes
 import indicadores
 
 JANELA_VOL = 21  # pregoes usados na volatilidade historica
+PAUSA_ENTRE_CONSULTAS = 1.5  # segundos; a Alpha Vantage aceita 1 por segundo
 
 
 def atualizar_niveis() -> dict:
@@ -122,7 +124,11 @@ def atualizar_globais() -> str:
 
     coletados = []
     falhas = []
-    for simbolo, nome, peso, inverte, substitui in indicadores.INDICADORES:
+    for posicao, (simbolo, nome, peso, inverte, substitui) in enumerate(indicadores.INDICADORES):
+        # A Alpha Vantage aceita 1 consulta por segundo. Sem esta pausa ela
+        # responde com um aviso em vez de dados, e o placar vem vazio.
+        if posicao:
+            time.sleep(PAUSA_ENTRE_CONSULTAS)
         try:
             c = fontes.alpha_cotacao(simbolo, chave)
         except comum.FonteIndisponivel as erro:
