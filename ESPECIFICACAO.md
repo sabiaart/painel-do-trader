@@ -348,3 +348,29 @@ ate que se decida o contrario.
 - [ ] Confirmar os caminhos de menu no site da B3 para os dois relatorios.
       Foram escritos de memoria, sem acessar o site.
 - [ ] Decidir se os dois JSON voltam para o Git quando o site for publico.
+
+### Acrescentado em 02/11/2026: a B3 juntou tudo no Boletim Diario
+
+O usuario trouxe o aviso do site: desde 07/04/2025, contratos em aberto
+passam a ser consultados no Boletim Diario do Mercado, capitulo Cotacoes -
+Resumo Estatistico; e a participacao por tipo de investidor, no capitulo
+Indicadores e Informativos, tabela Participacao dos Investidores.
+
+Consequencias:
+
+- **Bloco 4.7 (fluxo estrangeiro): viavel.** A tabela Participacao dos
+  Investidores tem compras e vendas por tipo, em R$ mil, com colunas de
+  porcentagem no meio. Nao tem coluna de saldo. O leitor foi ajustado para
+  calcular compras menos vendas e ignorar as porcentagens - sem isso, ele
+  pegaria a porcentagem achando que era dinheiro.
+- **Bloco 4.8 (quem esta comprado no WIN): em risco.** O Resumo Estatistico
+  traz contratos em aberto POR CONTRATO, nao por tipo de participante. Se a
+  divisao por participante tiver mesmo saido do publico, o bloco como esta
+  na secao 4.8 nao tem fonte gratuita.
+- O Boletim guarda so os ultimos 10 dias. Historico mais longo exige baixar
+  todo dia ou pagar.
+
+- [ ] Confirmar, com um arquivo de verdade na mao, se o Resumo Estatistico
+      ainda separa por tipo de participante.
+- [ ] Se nao separar: decidir entre trocar o 4.8 por contratos em aberto
+      totais do WIN (dado real, bloco mais fraco), remover o bloco, ou pagar.

@@ -43,15 +43,35 @@ LIDOS = ENTRADA / "ja-lidos"
 
 # Os quatro tipos de participante que o painel mostra, e as palavras que a
 # B3 usa para cada um. "nao residente" e o nome oficial do estrangeiro.
+#
+# Sao pedacos de palavra, nao a palavra inteira: a B3 escreve ora
+# "Institucional", ora "Institucionais", ora "Investidor Institucional".
+# Usar o radical cobre os tres sem precisar listar cada variacao.
+#
+# "instituicoes financeiras" nao casa com "institucion" (institui-coes), que
+# e justamente o que separa as duas linhas.
 PARTICIPANTES = [
-    ("estrangeiro", "Estrangeiro", ("nao residente", "estrangeiro", "nao-residente")),
-    ("institucional", "Institucional", ("institucional", "investidor institucional")),
-    ("pessoa_fisica", "Pessoa física", ("pessoa fisica", "pessoas fisicas", "individual")),
-    ("financeira", "Inst. financeira", ("instituicao financeira", "instituicoes financeiras")),
+    ("estrangeiro", "Estrangeiro", ("nao residente", "nao-residente", "estrangeir")),
+    ("financeira", "Inst. financeira", ("instituic", "financeira")),
+    ("institucional", "Institucional", ("institucion",)),
+    ("pessoa_fisica", "Pessoa física", ("pessoa fisica", "pessoas fisicas", "individu")),
 ]
+
+# A lista acima esta na ordem em que as palavras sao PROCURADAS, que e
+# ditada pelo risco de uma casar com a linha da outra. A tela tem a sua
+# propria ordem, do participante que mais move o indice para o que menos.
+ORDEM_TELA = ("estrangeiro", "institucional", "pessoa_fisica", "financeira")
 
 # Titulos de coluna que valem como saldo liquido, em ordem de preferencia.
 TITULOS_SALDO = ("saldo", "liquido", "net", "posicao liquida", "resultado")
+
+# A tabela "Participacao dos Investidores" do Boletim Diario NAO tem coluna
+# de saldo: ela traz compras e vendas, cada uma seguida da participacao em
+# porcento. Entao o saldo e calculado, e as colunas de porcentagem precisam
+# ser reconhecidas para nao serem confundidas com dinheiro.
+TITULOS_COMPRA = ("compra", "compras")
+TITULOS_VENDA = ("venda", "vendas")
+TITULOS_PERCENTUAL = ("%", "part", "percentual", "participacao")
 
 DATA_BR = re.compile(r"\b(\d{2})/(\d{2})/(\d{4})\b")
 DATA_ISO = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
@@ -116,29 +136,64 @@ def _achar_data(linhas: list[list[str]]) -> date | None:
     return None
 
 
-def _coluna_do_saldo(linhas: list[list[str]], ate: int) -> int | None:
-    """Em qual coluna esta o saldo, olhando os titulos acima dos dados."""
+def _colunas(linhas: list[list[str]], ate: int) -> dict[str, int]:
+    """Onde estao saldo, compras e vendas, olhando os titulos acima dos dados.
+
+    Percorre de baixo para cima: o cabecalho que interessa e o mais proximo
+    da linha de dados, nao o titulo geral no topo do arquivo.
+    """
+    achadas: dict[str, int] = {}
     for linha in reversed(linhas[:ate]):
         for posicao, celula in enumerate(linha):
             titulo = sem_acento(celula)
-            if titulo and any(t in titulo for t in TITULOS_SALDO):
-                return posicao
-    return None
+            if not titulo:
+                continue
+            # Coluna de porcentagem nunca e dinheiro nem contrato.
+            if any(t in titulo for t in TITULOS_PERCENTUAL):
+                continue
+            for nome, palavras in (
+                ("saldo", TITULOS_SALDO),
+                ("compra", TITULOS_COMPRA),
+                ("venda", TITULOS_VENDA),
+            ):
+                if nome not in achadas and any(p in titulo for p in palavras):
+                    achadas[nome] = posicao
+        if achadas:
+            return achadas
+    return achadas
 
 
-def _valor_da_linha(linha: list[str], coluna: int | None) -> tuple[float, str] | None:
-    """Tira o numero da linha. Devolve (valor, de onde veio) para o log."""
-    if coluna is not None and coluna < len(linha):
-        valor = numero(linha[coluna])
-        if valor is not None:
-            return valor, f"coluna {coluna + 1} (titulo de saldo)"
+def _valor_da_linha(linha: list[str], colunas: dict[str, int]) -> tuple[float, str] | None:
+    """Tira o saldo da linha. Devolve (valor, de onde veio) para o log."""
 
-    # Sem titulo reconhecivel: o saldo liquido e, nestes relatorios, sempre
-    # a ultima coluna numerica da linha (compras, vendas, saldo).
+    def celula(nome: str) -> float | None:
+        posicao = colunas.get(nome)
+        if posicao is None or posicao >= len(linha):
+            return None
+        return numero(linha[posicao])
+
+    saldo = celula("saldo")
+    if saldo is not None:
+        return saldo, f"coluna {colunas['saldo'] + 1} (titulo de saldo)"
+
+    # Boletim Diario: nao ha coluna de saldo, so compras e vendas.
+    compra, venda = celula("compra"), celula("venda")
+    if compra is not None and venda is not None:
+        return (
+            compra - venda,
+            f"compras (coluna {colunas['compra'] + 1}) menos vendas "
+            f"(coluna {colunas['venda'] + 1})",
+        )
+
+    # Ultimo recurso, e o mais arriscado: se a tabela tiver coluna de
+    # porcentagem no fim, o ultimo numero da linha e a porcentagem, nao o
+    # saldo. Por isso isto so vale quando nenhum titulo foi reconhecido.
+    if colunas:
+        return None
     for posicao in range(len(linha) - 1, -1, -1):
         valor = numero(linha[posicao])
         if valor is not None:
-            return valor, f"coluna {posicao + 1} (ultimo numero da linha)"
+            return valor, f"coluna {posicao + 1} (ultimo numero; nenhum titulo reconhecido)"
     return None
 
 
@@ -166,8 +221,7 @@ def _ler_participantes(caminho: Path) -> tuple[date, dict[str, float], list[str]
                 continue
             if not any(p in primeiras for p in palavras):
                 continue
-            coluna = _coluna_do_saldo(linhas, posicao)
-            achado = _valor_da_linha(linha, coluna)
+            achado = _valor_da_linha(linha, _colunas(linhas, posicao))
             if achado is None:
                 continue
             valor, origem = achado
@@ -339,10 +393,12 @@ def atualizar_participantes() -> str:
     # isso, compara com o que houver.
     anterior = serie[-6][1] if len(serie) >= 6 else (serie[0][1] if len(serie) > 1 else {})
 
+    rotulos = {chave: rotulo for chave, rotulo, _ in PARTICIPANTES}
     lista = []
-    for chave, rotulo, _ in PARTICIPANTES:
+    for chave in ORDEM_TELA:
         if chave not in atuais:
             continue
+        rotulo = rotulos[chave]
         saldo = atuais[chave]
         antes = anterior.get(chave)
         lista.append(

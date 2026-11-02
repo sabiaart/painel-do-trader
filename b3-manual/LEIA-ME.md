@@ -33,42 +33,43 @@ fica sempre vazia e você vê de olho o que ainda falta baixar.
 
 ---
 
-## Arquivo 1 — fluxo estrangeiro
+## Os dois dados estão no mesmo lugar
 
-Link: **[Mercado à vista · Dados de mercado](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/mercado-a-vista/dados-de-mercado/)**
+Desde 07/04/2025 a B3 juntou tudo no **Boletim Diário do Mercado**:
 
-Procure a planilha de **participação por tipo de investidor / movimentação
-dos investidores estrangeiros**. É mensal ou anual, não diária — melhor
-assim: ela já traz vários pregões de uma vez, e o gráfico de 20 barras
-enche no primeiro download.
+**[Boletim Diário do Mercado](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/boletim-diario/dados-publicos-de-produtos-listados-e-de-balcao/)**
 
-Duas coisas que descobri e que mudam o combinado:
+Baixe sempre em **CSV**, nunca em PDF — PDF eu não leio.
+O site guarda só os **últimos 10 dias**, então o histórico se perde se você
+ficar muito tempo sem baixar.
 
-- **A planilha diária avulsa acabou.** Desde dezembro de 2022 a B3 publica a
-  participação dos investidores só dentro do **Boletim Diário do Mercado
-  (BDI)**, em PDF e CSV. Se você for pelo BDI, pegue o **CSV** — PDF eu não
-  leio. Link: [Boletim Diário](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/boletim-diario/dados-publicos-de-produtos-listados-e-de-balcao/)
-- **O dado é D+2:** o de hoje é o pregão de dois dias úteis atrás. O painel
-  mostra a data que vier no arquivo, então isso aparece na tela — mas não
-  espere o fluxo de ontem.
+### Arquivo 1 — fluxo estrangeiro  ✅
 
-Vira o bloco **"Fluxo estrangeiro"**.
+Capítulo **Indicadores e Informativos**, tabela **Participação dos
+Investidores**.
 
-## Arquivo 2 — posições por participante
+Traz compras e vendas por tipo de investidor, em **R$ mil**, cada uma com a
+sua participação em porcento. Não tem coluna de saldo: o leitor calcula
+compras menos vendas e ignora as colunas de porcentagem.
 
-Link: **[Contratos em aberto · por tipo de participante](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/mercado-de-derivativos/contratos-em-aberto/por-tipo-de-participante/)**
+Jogue o arquivo em `b3-manual/fluxo/`. Vira o bloco **"Fluxo estrangeiro"**.
 
-Escolha o contrato **WIN** (mini índice) e baixe o arquivo do pregão. Precisa
-ter a data e uma linha por tipo de participante (não residente,
-institucional, pessoa física, instituição financeira), com o saldo em
-**contratos**.
+### Arquivo 2 — posições por participante  ⚠️
 
-Vira o bloco **"Quem está comprado no WIN"**.
+Capítulo **Cotações**, tabela **Resumo Estatístico**.
 
-> **Estes dois links vieram de um buscador, não do site da B3** — eu não
-> acesso b3.com.br. Então pode ser que a página tenha mudado de lugar ou que
-> o botão de download esteja noutro canto dela. Se o link não levar ao
-> arquivo, me diga o que apareceu na tela que eu procuro de novo.
+**Atenção: isto provavelmente não serve.** O Resumo Estatístico traz os
+contratos em aberto **por contrato** (WINZ26, e assim por diante), e não
+divididos por tipo de participante. Se for isso mesmo, o bloco "Quem está
+comprado no WIN" como foi especificado não existe mais de graça.
+
+Baixe assim mesmo e jogue em `b3-manual/participantes/`. Se a tabela tiver a
+divisão por participante, o leitor acha; se não tiver, ele avisa e eu
+reescrevo o bloco para mostrar outra coisa.
+
+> **O link veio de um buscador, não do site da B3** — eu não acesso
+> b3.com.br. Os capítulos e tabelas acima vieram do aviso que você me
+> mostrou. Se a página não bater com isto, me diga o que apareceu.
 
 ---
 
