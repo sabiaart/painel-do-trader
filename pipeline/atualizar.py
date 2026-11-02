@@ -22,91 +22,145 @@ JANELA_VOL = 21  # pregoes usados na volatilidade historica
 PAUSA_ENTRE_CONSULTAS = 1.5  # segundos; a Alpha Vantage aceita 1 por segundo
 
 
-def atualizar_niveis() -> dict:
-    """Coloca volatilidade real no movimento esperado de WIN e WDO.
+def _niveis_do_contrato(ativo: str, cotacao: dict) -> dict:
+    """Monta o painel de um futuro a partir do contrato de verdade."""
+    simbolo = cotacao["symbol"]
+    serie = fontes.futuro_historico(simbolo)
 
-    O ajuste anterior, a maxima e a minima continuam sendo exemplo: esses
-    numeros vem dos arquivos de fim de dia da B3, que so entram na Fase 3.
-    O que muda aqui e a LARGURA da faixa, que passa a ser real.
+    ajustes = [d["ajuste"] for d in serie]
+    vol = calculos.volatilidade_historica(ajustes, JANELA_VOL)
+    ajuste = float(cotacao["settlement"])
+    desvio = calculos.movimento_esperado(ajuste, vol)
+
+    acertos, avaliados = calculos.faixa_respeitada(serie, janela=30, vol_janela=JANELA_VOL)
+    vencimento = date.fromisoformat(cotacao["expirationDate"])
+    casas = 0 if ativo == "WIN" else 1
+
+    return {
+        "nome": f"{ativo} · {cotacao.get('assetDescription', ativo)}",
+        "contrato": simbolo,
+        "ajuste": round(ajuste, casas),
+        # Gap previsto precisa de preco de pre-mercado, que nao temos.
+        "gap": None,
+        "maxima": round(float(cotacao["high"]), casas) if cotacao.get("high") else None,
+        "minima": round(float(cotacao["low"]), casas) if cotacao.get("low") else None,
+        "desvio": round(desvio, casas),
+        "casas": casas,
+        "dias_vencimento": (vencimento - date.today()).days,
+        "vencimento": vencimento.isoformat(),
+        "exemplo_preco": f"{ajuste:,.{casas}f}".replace(",", "@").replace(".", ",").replace("@", "."),
+        "faixa_ampliada": None,
+        "acertos": acertos if avaliados else None,
+        "janela": avaliados or None,
+        "fechamento": None,
+        "pregao": serie[-1]["data"].isoformat(),
+        "volatilidade": {
+            "anual_pct": round(vol * 100, 1),
+            "metodo": f"histórica de {JANELA_VOL} pregões do próprio contrato",
+            "fonte": f"brapi.dev ({simbolo}, preço de ajuste da B3)",
+            "citacao": None,
+            "data": serie[-1]["data"].isoformat(),
+        },
+    }
+
+
+def atualizar_niveis() -> dict:
+    """Niveis do dia de WIN e WDO, com o contrato em vigor.
+
+    Fonte principal: brapi, que da ajuste, maxima, minima e o historico do
+    proprio contrato. Se ela cair, cai para o plano antigo: mantem o ajuste
+    de exemplo e tira a volatilidade do Banco Central e do FRED.
     """
     atual = comum.ler("niveis")
     if atual is None:
         raise comum.FonteIndisponivel("site/data/niveis.json sumiu")
 
-    # Campo antigo: a volatilidade agora e descrita dentro de cada ativo.
-    atual.pop("metodo_volatilidade", None)
+    for campo in ("metodo_volatilidade", "motivo_falha", "verificado_em"):
+        atual.pop(campo, None)
 
-    # Marcas deixadas por uma falha anterior. A fonte voltou, entao saem.
-    atual.pop("motivo_falha", None)
-    atual.pop("verificado_em", None)
+    resultados: dict[str, str] = {}
+    falhas: list[str] = []
+    reais = 0
 
-    # Duas coisas que a tela nao pode afirmar enquanto nao forem calculadas
-    # de verdade. Ao lado de uma volatilidade real, numero de exemplo engana.
-    #
-    # - faixa_ampliada: o pipeline ainda nao amplia a faixa em dia de evento.
-    # - acertos: depende da maxima e da minima de cada pregao, que vem dos
-    #   arquivos da B3, so na Fase 3.
-    for ativo in atual["ativos"].values():
-        ativo["faixa_ampliada"] = None
-        ativo["acertos"] = None
-        ativo["fechamento"] = None
-
-    resultados = {}
-    falhas = []
-
-    # --- WDO: volatilidade do proprio dolar, do Banco Central ---
     try:
-        serie = fontes.dolar_ptax()
-        precos = [v for _, v in serie]
-        vol = calculos.volatilidade_historica(precos, JANELA_VOL)
-        # O WDO e cotado por mil dolares: 5,4212 no cambio = 5.421,2 no WDO.
-        preco_wdo = precos[-1] * 1000
-        atual["ativos"]["wdo"]["desvio"] = round(calculos.movimento_esperado(preco_wdo, vol), 1)
-        atual["ativos"]["wdo"]["volatilidade"] = {
-            "anual_pct": round(vol * 100, 1),
-            "metodo": f"histórica de {JANELA_VOL} pregões",
-            "fonte": "Banco Central (SGS 1, dólar PTAX de venda)",
-            "citacao": "Banco Central do Brasil, sistema SGS, série 1 (dólar PTAX de venda).",
-            "data": serie[-1][0].isoformat(),
-        }
-        resultados["wdo"] = f"vol {vol * 100:.1f}% a.a. (PTAX de {serie[-1][0]:%d/%m})"
-    except (comum.FonteIndisponivel, ValueError) as erro:
-        falhas.append(f"dólar: {erro}")
+        vigentes = fontes.futuros_vigentes()
+    except comum.FonteIndisponivel as erro:
+        vigentes = {}
+        falhas.append(f"brapi: {erro}")
 
-    # --- WIN: volatilidade implicita do EWZ, via FRED ---
-    # A especificacao manda usar o VIX do Ibovespa e deixa o VXEWZ como
-    # reserva. O VIX do Ibovespa ainda depende de checar licenca (secao 10),
-    # entao na Fase 2 fica a reserva, dita com todas as letras na tela.
-    try:
-        serie = fontes.vol_ewz()
-        vol = serie[-1][1] / 100
-        preco_win = atual["ativos"]["win"]["ajuste"]
-        atual["ativos"]["win"]["desvio"] = round(calculos.movimento_esperado(preco_win, vol))
-        atual["ativos"]["win"]["volatilidade"] = {
-            "anual_pct": round(vol * 100, 1),
-            "metodo": "implícita do EWZ (reserva do VIX do Ibovespa)",
-            "fonte": "FRED / Cboe (VXEWZCLS)",
-            # O FRED marca esta serie como "Copyrighted: Citation required".
-            # A citacao sugerida por eles e obrigatoria onde o dado aparece.
-            "citacao": (
-                "Chicago Board Options Exchange, CBOE Brazil ETF Volatility Index "
-                "[VXEWZCLS], retrieved from FRED, Federal Reserve Bank of St. Louis."
-            ),
-            "data": serie[-1][0].isoformat(),
-        }
-        resultados["win"] = f"vol {vol * 100:.1f}% a.a. (VXEWZ de {serie[-1][0]:%d/%m})"
-    except (comum.FonteIndisponivel, ValueError, IndexError) as erro:
-        falhas.append(f"VXEWZ: {erro}")
+    for ativo, chave in (("WIN", "win"), ("WDO", "wdo")):
+        if ativo not in vigentes:
+            continue
+        try:
+            atual["ativos"][chave] = _niveis_do_contrato(ativo, vigentes[ativo])
+            reais += 1
+            d = atual["ativos"][chave]
+            acerto = f", faixa respeitada em {d['acertos']}/{d['janela']}" if d["acertos"] is not None else ""
+            resultados[chave] = f"{d['contrato']} ajuste {d['ajuste']}, vol {d['volatilidade']['anual_pct']}%{acerto}"
+        except (comum.FonteIndisponivel, ValueError, KeyError) as erro:
+            falhas.append(f"{ativo}: {erro}")
+
+    # --- Plano B, so para quem nao veio da brapi ---
+    if "win" not in resultados or "wdo" not in resultados:
+        _volatilidade_de_reserva(atual, resultados, falhas)
 
     if not resultados:
-        raise comum.FonteIndisponivel("; ".join(falhas))
+        raise comum.FonteIndisponivel("; ".join(falhas) or "nenhuma fonte respondeu")
 
-    # O ajuste ainda e exemplo, entao o aviso de exemplo continua de pe.
-    atual.update(comum.cabecalho("Banco Central e FRED (volatilidade); ajustes ainda de exemplo", exemplo=True))
-    atual["volatilidade_real"] = True
+    tudo_real = reais == 2
+    atual.update(
+        comum.cabecalho(
+            "brapi.dev (ajuste e histórico da B3)" if tudo_real
+            else "brapi.dev, Banco Central e FRED; parte ainda de exemplo",
+            exemplo=not tudo_real,
+        )
+    )
     atual["falhas"] = falhas
     comum.gravar("niveis", atual)
     return resultados
+
+
+def _volatilidade_de_reserva(atual: dict, resultados: dict, falhas: list) -> None:
+    """Plano B: ajuste continua de exemplo, volatilidade vem do BCB e do FRED."""
+    if "wdo" not in resultados:
+        try:
+            serie = fontes.dolar_ptax()
+            precos = [v for _, v in serie]
+            vol = calculos.volatilidade_historica(precos, JANELA_VOL)
+            alvo = atual["ativos"]["wdo"]
+            alvo["desvio"] = round(calculos.movimento_esperado(precos[-1] * 1000, vol), 1)
+            alvo["acertos"] = None
+            alvo["volatilidade"] = {
+                "anual_pct": round(vol * 100, 1),
+                "metodo": f"histórica de {JANELA_VOL} pregões",
+                "fonte": "Banco Central (SGS 1, dólar PTAX de venda)",
+                "citacao": "Banco Central do Brasil, sistema SGS, série 1 (dólar PTAX de venda).",
+                "data": serie[-1][0].isoformat(),
+            }
+            resultados["wdo"] = f"reserva: vol {vol * 100:.1f}% (PTAX)"
+        except (comum.FonteIndisponivel, ValueError) as erro:
+            falhas.append(f"dólar PTAX: {erro}")
+
+    if "win" not in resultados:
+        try:
+            serie = fontes.vol_ewz()
+            vol = serie[-1][1] / 100
+            alvo = atual["ativos"]["win"]
+            alvo["desvio"] = round(calculos.movimento_esperado(alvo["ajuste"], vol))
+            alvo["acertos"] = None
+            alvo["volatilidade"] = {
+                "anual_pct": round(vol * 100, 1),
+                "metodo": "implícita do EWZ (reserva)",
+                "fonte": "FRED / Cboe (VXEWZCLS)",
+                "citacao": (
+                    "Chicago Board Options Exchange, CBOE Brazil ETF Volatility Index "
+                    "[VXEWZCLS], retrieved from FRED, Federal Reserve Bank of St. Louis."
+                ),
+                "data": serie[-1][0].isoformat(),
+            }
+            resultados["win"] = f"reserva: vol {vol * 100:.1f}% (VXEWZ)"
+        except (comum.FonteIndisponivel, ValueError, IndexError) as erro:
+            falhas.append(f"VXEWZ: {erro}")
 
 
 def atualizar_globais() -> str:

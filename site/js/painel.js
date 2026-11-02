@@ -269,15 +269,25 @@ async function niveis() {
     const lo2 = a.ajuste - 2 * a.desvio, hi2 = a.ajuste + 2 * a.desvio;
 
     $(`${chave}-titulo`).textContent = a.nome;
-    $(`${chave}-venc`).textContent = `vence em ${a.dias_vencimento} dias`;
+    $(`${chave}-venc`).textContent = a.contrato
+      ? `${a.contrato} · vence em ${a.dias_vencimento} dias`
+      : `vence em ${a.dias_vencimento} dias`;
     $(`${chave}-ajuste`).textContent = fmt(a.ajuste, c);
 
+    /* Gap previsto precisa de preço de pré-mercado, que não temos licença
+       para usar. Enquanto não houver, o campo não inventa número. */
     const gap = $(`${chave}-gap`);
-    gap.textContent = `${a.gap >= 0 ? "+" : "−"}${fmt(Math.abs(a.gap), c)}${chave === "win" ? " pts" : ""}`;
-    gap.className = a.gap >= 0 ? "up" : "down";
+    if (a.gap == null) {
+      gap.textContent = "—";
+      gap.className = "muted";
+      gap.title = "Depende de preço de pré-mercado, que o painel ainda não tem.";
+    } else {
+      gap.textContent = `${a.gap >= 0 ? "+" : "−"}${fmt(Math.abs(a.gap), c)}${chave === "win" ? " pts" : ""}`;
+      gap.className = a.gap >= 0 ? "up" : "down";
+    }
 
-    $(`${chave}-max`).textContent = fmt(a.maxima, c);
-    $(`${chave}-min`).textContent = fmt(a.minima, c);
+    $(`${chave}-max`).textContent = a.maxima == null ? "—" : fmt(a.maxima, c);
+    $(`${chave}-min`).textContent = a.minima == null ? "—" : fmt(a.minima, c);
     $(`${chave}-desvio`).textContent = `±${fmt(a.desvio, c)} pts`;
     $(`${chave}-lo`).textContent = fmt(lo1, c);
     $(`${chave}-hi`).textContent = fmt(hi1, c);
@@ -301,9 +311,11 @@ async function niveis() {
     const linhaVol = $(`${chave}-vol`);
     if (vol) {
       const dia = new Date(`${vol.data}T12:00:00`).toLocaleDateString("pt-BR");
+      /* A ressalva sobre o ajuste só aparece quando ele é mesmo de exemplo. */
+      const ressalva = d.exemplo ? " O ajuste anterior ainda é de exemplo." : "";
       linhaVol.innerHTML =
         `Volatilidade <b>${fmt(vol.anual_pct, 1)}% ao ano</b>, ${vol.metodo}, de ${dia}. ` +
-        `Fonte: ${vol.fonte}. O ajuste anterior ainda é de exemplo.` +
+        `Fonte: ${vol.fonte}.${ressalva}` +
         (vol.citacao ? `<br><span class="muted">${vol.citacao}</span>` : "");
       linhaVol.hidden = false;
     } else {

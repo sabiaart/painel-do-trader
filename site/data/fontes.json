@@ -1,18 +1,18 @@
 {
- "gerado_em": "2026-11-02T16:55:01-03:00",
+ "gerado_em": "2026-11-02T17:21:44-03:00",
  "origem": "pipeline",
  "exemplo": false,
  "desatualizado": false,
  "fontes": {
   "niveis": {
    "situacao": "ok",
-   "detalhe": "vol 37.5% a.a. (PTAX de 30/10) · vol 36.4% a.a. (VXEWZ de 30/10)",
-   "em": "2026-11-02T16:54:46-03:00"
+   "detalhe": "WINZ26 ajuste 170165.0, vol 63.6%, faixa respeitada em 19/30 · WDOX26 ajuste 5421.2, vol 33.6%, faixa respeitada em 20/30",
+   "em": "2026-11-02T17:21:28-03:00"
   },
   "globais": {
    "situacao": "ok",
    "detalhe": "6 de 10 a favor, pregão de 2026-10-30",
-   "em": "2026-11-02T16:55:01-03:00"
+   "em": "2026-11-02T17:21:44-03:00"
   }
  }
 }

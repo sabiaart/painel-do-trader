@@ -58,22 +58,39 @@ def percentil(valor: float, historico: list[float]) -> int:
     return round(abaixo / len(historico) * 100)
 
 
-def faixa_respeitada(
-    maximas: list[float], minimas: list[float], ajustes: list[float], desvios: list[float]
-) -> tuple[int, int]:
+def faixa_respeitada(serie: list[dict], janela: int = 30, vol_janela: int = 21) -> tuple[int, int]:
     """Em quantos dos ultimos pregoes o preco ficou dentro de 1 desvio.
 
-    Devolve (acertos, total). Usa maxima e minima de fim de dia, como diz
-    a especificacao.
+    `serie` e a lista de pregoes, do mais antigo para o mais novo, com
+    `ajuste`, `maxima` e `minima`.
+
+    Para cada dia, refaz a conta como ela teria sido feita NAQUELE dia:
+    pega o ajuste do dia anterior e a volatilidade dos pregoes ate ali.
+    Usar a volatilidade de hoje para julgar o passado inflaria o acerto.
+
+    Devolve (acertos, total_avaliado).
     """
-    total = min(len(maximas), len(minimas), len(ajustes), len(desvios))
     acertos = 0
-    for i in range(total):
-        teto = ajustes[i] + desvios[i]
-        piso = ajustes[i] - desvios[i]
-        if maximas[i] <= teto and minimas[i] >= piso:
+    avaliados = 0
+
+    # Comeca onde ja existe historico suficiente para medir volatilidade.
+    primeiro = max(vol_janela + 1, len(serie) - janela)
+    for i in range(primeiro, len(serie)):
+        dia = serie[i]
+        if dia["maxima"] is None or dia["minima"] is None:
+            continue
+        anteriores = [d["ajuste"] for d in serie[: i]]
+        try:
+            vol = volatilidade_historica(anteriores, vol_janela)
+        except ValueError:
+            continue
+        centro = serie[i - 1]["ajuste"]
+        desvio = movimento_esperado(centro, vol)
+        avaliados += 1
+        if dia["maxima"] <= centro + desvio and dia["minima"] >= centro - desvio:
             acertos += 1
-    return acertos, total
+
+    return acertos, avaliados
 
 
 def variacao_percentual(serie: list[tuple[date, float]]) -> float:

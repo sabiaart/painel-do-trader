@@ -17,7 +17,7 @@ from __future__ import annotations
 import csv
 import io
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from comum import FonteIndisponivel, baixar
 
@@ -140,6 +140,106 @@ def alpha_cotacao(simbolo: str, chave: str) -> dict:
         "variacao": (preco / anterior - 1) * 100,
         "data": dia,
     }
+
+
+BRAPI = "https://brapi.dev/api/v2/futures"
+LETRAS_MES = "FGHJKMNQUVXZ"  # codigo de vencimento da B3: F=jan ... Z=dez
+
+
+def _brapi(caminho: str, parametros: dict) -> dict:
+    """Chama a brapi. Os contratos WIN e WDO nao precisam de token.
+
+    Atencao (registrado na secao 10 da especificacao): a brapi declara nao
+    ser distribuidora licenciada da B3. Serve para o painel pessoal; para um
+    site publico a licenca continua em aberto.
+    """
+    from urllib.parse import urlencode
+
+    url = f"{BRAPI}/{caminho}?" + urlencode(parametros)
+    try:
+        resposta = json.loads(baixar(url).decode("utf-8"))
+    except json.JSONDecodeError as erro:
+        raise FonteIndisponivel(f"brapi {caminho}: resposta nao e JSON ({erro})") from erro
+    if isinstance(resposta, dict) and resposta.get("error"):
+        raise FonteIndisponivel(f"brapi {caminho}: {resposta.get('message')}")
+    return resposta
+
+
+def futuros_vigentes() -> dict[str, dict]:
+    """Contrato de WIN e de WDO em vigor hoje.
+
+    Em vez de reimplementar as regras de vencimento da B3 (que diferem entre
+    os dois e mudam com feriado), pergunta por varios codigos de uma vez e
+    fica com o de vencimento mais proximo que ainda nao passou. Se a regra
+    mudar, isto continua certo.
+    """
+    hoje = date.today()
+    candidatos = []
+    for passo in range(10):
+        mes = (hoje.month - 1 + passo) % 12
+        ano = hoje.year + (hoje.month - 1 + passo) // 12
+        candidatos.append(f"WIN{LETRAS_MES[mes]}{ano % 100:02d}")
+        candidatos.append(f"WDO{LETRAS_MES[mes]}{ano % 100:02d}")
+
+    dados = _brapi("quote", {"symbols": ",".join(candidatos[:20])})
+    cotacoes = dados.get("quotes") or []
+    if not cotacoes:
+        raise FonteIndisponivel("brapi nao devolveu nenhum contrato futuro")
+
+    vigentes: dict[str, dict] = {}
+    for cotacao in sorted(cotacoes, key=lambda c: c.get("expirationDate") or ""):
+        ativo = cotacao.get("underlyingAsset")
+        if ativo not in ("WIN", "WDO") or ativo in vigentes:
+            continue
+        try:
+            vencimento = date.fromisoformat(cotacao["expirationDate"])
+        except (KeyError, ValueError):
+            continue
+        if vencimento < hoje:
+            continue  # ja venceu
+        if cotacao.get("settlement") is None:
+            continue  # sem ajuste nao da para centrar a faixa
+        vigentes[ativo] = cotacao
+
+    faltando = {"WIN", "WDO"} - vigentes.keys()
+    if faltando:
+        raise FonteIndisponivel(f"nao achei contrato vigente de {', '.join(sorted(faltando))}")
+    return vigentes
+
+
+def futuro_historico(simbolo: str, dias: int = 200) -> list[dict]:
+    """Serie diaria de um contrato: ajuste, maxima e minima, do mais antigo
+    para o mais novo. Dias sem ajuste sao descartados."""
+    from datetime import timedelta
+
+    inicio = date.today() - timedelta(days=dias)
+    dados = _brapi(
+        "historical",
+        {"symbol": simbolo, "startDate": inicio.isoformat(), "sortOrder": "asc"},
+    )
+    bruto = (dados.get("future") or {}).get("history") or []
+
+    serie = []
+    for ponto in bruto:
+        ajuste = ponto.get("settlement")
+        if not ajuste:
+            continue
+        try:
+            dia = datetime.fromtimestamp(ponto["date"], tz=timezone.utc).date()
+        except (KeyError, TypeError, ValueError, OSError):
+            continue
+        serie.append(
+            {
+                "data": dia,
+                "ajuste": float(ajuste),
+                "maxima": float(ponto["high"]) if ponto.get("high") else None,
+                "minima": float(ponto["low"]) if ponto.get("low") else None,
+            }
+        )
+
+    if len(serie) < 25:
+        raise FonteIndisponivel(f"{simbolo}: só {len(serie)} pregões no histórico")
+    return serie
 
 
 def dolar_ptax(dias: int = 400) -> list[tuple[date, float]]:
