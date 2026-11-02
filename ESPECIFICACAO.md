@@ -236,13 +236,45 @@ Custos possíveis depois: licença de cotações da B3 com atraso (via distribui
 
 ## 10. Pendências a verificar antes de usar cada fonte
 
-- [ ] Termos de uso dos **arquivos públicos de download da B3** (posições em aberto, participação de investidores, prêmios de opções): o download automatizado e a exibição pública de valores derivados são permitidos?
+- [x] ~~Termos de uso dos **arquivos públicos de download da B3**~~ — **RESPONDIDO EM 02/11/2026: NÃO.** Ver abaixo.
 - [ ] Se não forem: qual **API de terceiros** licenciada oferece esses dados, e a que preço?
 - [ ] Termos de exibição do **S&P/B3 Ibovespa VIX** (site da S&P DJI).
 - [ ] Licença de **exibição pública** da API de mercados globais escolhida.
 - [ ] **Unidade do open interest** nas opções de BOVA11 (por opção ou por lote) e o multiplicador correto no GEX.
 - [ ] Termos dos **feeds RSS** de notícias usados no tom das notícias.
 - [ ] Custo de **cotações com atraso** da B3 via distribuidor (para a fase "Depois").
+
+### Resposta sobre a B3, obtida em 02/11/2026
+
+As páginas de dados da B3 trazem este aviso, palavra por palavra:
+
+> "Os dados e informações disponibilizados nesta página são de propriedade
+> exclusiva da B3 e destinam-se estritamente à consulta informativa, conforme
+> Termos e Condições de Uso. Para manutenção da segurança do site e integridade
+> dos dados e informações disponibilizados, **é expressamente vedada a coleta
+> automatizada, inclusive por meio de ferramentas de inteligência artificial,
+> para quaisquer finalidades, comerciais ou não, próprias ou de terceiros**."
+
+Verificado em duas páginas diferentes, inclusive na de download dos arquivos
+históricos. O aviso é geral, não é de uma página só.
+
+Isso fecha a porta da Fase 3 como ela estava escrita:
+
+- "coleta automatizada" cobre o robô baixando arquivo, não só raspagem de tela.
+- "para quaisquer finalidades, comerciais ou não" — uso pessoal não ajuda.
+- "inclusive por meio de ferramentas de inteligência artificial" — explícito.
+
+Caminhos que sobram, a decidir:
+
+- [ ] **API de terceiros licenciada** que redistribua dados da B3 (a própria
+  especificação cita Dados de Mercado para o fluxo estrangeiro). Levantar quais
+  existem, o que cobrem e a que preço.
+- [ ] **Download manual pelo dono.** A proibição é da coleta *automatizada*.
+  Uma pessoa baixando o arquivo e colocando numa pasta é consulta informativa,
+  e o robô nunca toca no site da B3: ele só lê o arquivo que já está no
+  computador. Serve para o painel pessoal offline. Para um site público
+  continuaria faltando licença.
+- [ ] Deixar os blocos que dependem da B3 fora do painel.
 
 ### Acrescentado em 02/11/2026, depois da pesquisa de APIs
 
