@@ -35,35 +35,40 @@ fica sempre vazia e você vê de olho o que ainda falta baixar.
 
 ## Arquivo 1 — fluxo estrangeiro
 
-No site da B3, procure o relatório **"Participação dos investidores"** do
-mercado à vista (segmento Bovespa). Em geral fica em
-*Market Data → Consultas → Mercado à vista*.
+Link: **[Mercado à vista · Dados de mercado](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/mercado-a-vista/dados-de-mercado/)**
 
-O arquivo serve se tiver:
+Procure a planilha de **participação por tipo de investidor / movimentação
+dos investidores estrangeiros**. É mensal ou anual, não diária — melhor
+assim: ela já traz vários pregões de uma vez, e o gráfico de 20 barras
+enche no primeiro download.
 
-- a **data do pregão** escrita em algum lugar;
-- uma **linha por tipo de investidor**, com "Investidor não residente" ou
-  "Estrangeiro" entre elas;
-- uma coluna de **saldo** (ou compras, vendas e saldo — o leitor usa a última
-  coluna numérica da linha quando não acha o título "saldo").
+Duas coisas que descobri e que mudam o combinado:
 
-Vira o bloco **"Fluxo estrangeiro"**: barras dos últimos 20 pregões em R$ bi.
+- **A planilha diária avulsa acabou.** Desde dezembro de 2022 a B3 publica a
+  participação dos investidores só dentro do **Boletim Diário do Mercado
+  (BDI)**, em PDF e CSV. Se você for pelo BDI, pegue o **CSV** — PDF eu não
+  leio. Link: [Boletim Diário](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/boletim-diario/dados-publicos-de-produtos-listados-e-de-balcao/)
+- **O dado é D+2:** o de hoje é o pregão de dois dias úteis atrás. O painel
+  mostra a data que vier no arquivo, então isso aparece na tela — mas não
+  espere o fluxo de ontem.
+
+Vira o bloco **"Fluxo estrangeiro"**.
 
 ## Arquivo 2 — posições por participante
 
-Procure o relatório de **posições em aberto por tipo de participante** nos
-derivativos. Em geral fica em *Market Data → Consultas → Derivativos*.
+Link: **[Contratos em aberto · por tipo de participante](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/mercado-de-derivativos/contratos-em-aberto/por-tipo-de-participante/)**
 
-Mesmas exigências: data do pregão e uma linha por tipo de participante
-(não residente, institucional, pessoa física, instituição financeira), com o
-saldo em **contratos**.
+Escolha o contrato **WIN** (mini índice) e baixe o arquivo do pregão. Precisa
+ter a data e uma linha por tipo de participante (não residente,
+institucional, pessoa física, instituição financeira), com o saldo em
+**contratos**.
 
 Vira o bloco **"Quem está comprado no WIN"**.
 
-> **Os caminhos de menu acima podem ter mudado.** Eu não acesso o site da B3,
-> então não pude conferir onde cada relatório está hoje — vá pelo **nome do
-> relatório**, não pelo caminho. Quando você achar, me diga o caminho certo
-> que eu corrijo este arquivo.
+> **Estes dois links vieram de um buscador, não do site da B3** — eu não
+> acesso b3.com.br. Então pode ser que a página tenha mudado de lugar ou que
+> o botão de download esteja noutro canto dela. Se o link não levar ao
+> arquivo, me diga o que apareceu na tela que eu procuro de novo.
 
 ---
 
