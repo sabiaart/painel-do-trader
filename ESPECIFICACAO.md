@@ -276,6 +276,42 @@ Caminhos que sobram, a decidir:
   continuaria faltando licença.
 - [ ] Deixar os blocos que dependem da B3 fora do painel.
 
+### Pesquisa de APIs brasileiras, 02/11/2026
+
+Testadas: brapi.dev, Mais Retorno, HG Brasil, bolsai, BrasilAPI.
+
+**O que existe de graca (brapi.dev), testado e funcionando:**
+
+| Dado | Endpoint | Token? |
+|---|---|---|
+| WIN e WDO: ajuste, maxima, minima, vencimento, variacao | `/api/v2/futures/quote?symbols=WINZ26` | nao precisa |
+| Serie diaria de ~1 ano do mesmo contrato | `/api/v2/futures/historical?symbol=WINZ26` | nao precisa |
+| Ibovespa (^BVSP) | `/api/quote/%5EBVSP` | token gratuito |
+
+A documentacao diz: "Sem token, aceita so symbols que comecam com WIN ou WDO".
+Conferido: o ajuste do WDOX26 (5.421,2) bate exatamente com o PTAX do Banco
+Central (5,4212 x 1000), o que da confianca na origem do numero.
+
+Isso resolve de graca: ajuste/maxima/minima reais de WIN e WDO, volatilidade
+historica do proprio WIN (hoje usa o VXEWZ como aproximacao) e o placar de
+"faixa respeitada em X dos ultimos 30 pregoes".
+
+**O que NAO existe em nenhuma API gratuita:**
+
+- Fluxo estrangeiro (participacao dos investidores).
+- Posicoes em aberto por tipo de participante (estrangeiro, institucional, PF).
+
+Esses dois continuam dependendo de download manual ou de servico pago.
+
+**Ressalva de licenca, a decidir:** a brapi declara no proprio site que "nao e
+distribuidora nem redistribuidora licenciada da B3" e que reune "dados de
+fontes abertas e publicas... apenas para fins informativos". A especificacao
+pedia "APIs de terceiros licenciadas", entao, ao pe da letra, a brapi nao
+atende esse criterio. Para o painel pessoal offline o risco e baixo. Para um
+site publico, a pergunta continua aberta.
+
+- [ ] Decidir se a brapi serve, apesar de ela nao se declarar licenciada.
+
 ### Acrescentado em 02/11/2026, depois da pesquisa de APIs
 
 - [ ] **Nenhuma API de mercados globais pesquisada permite exibição pública em plano barato.** Twelve Data, Finnhub, FMP, EODHD e Polygon (hoje Massive) tratam os planos de autoatendimento como uso pessoal e não comercial; exibição pública exige plano empresarial ou contrato negociado. O gargalo não é o fornecedor: é a licença das bolsas (NYSE, Nasdaq, CME, ICE, DCE) por baixo. Decidir entre adiar o bloco de globais ou orçar centenas de dólares por mês.
