@@ -43,10 +43,14 @@ async function globais() {
       const v = a.unidade === "bps"
         ? `${fmt(Math.abs(a.variacao))} bps`
         : `${fmt(Math.abs(a.variacao), 2)}%`;
+      /* Quando o papel é um substituto (SPY no lugar do futuro do S&P),
+         a tela diz isso. O nome mostrado é sempre o do papel de verdade. */
+      const nota = a.substitui ? `<span class="w">no lugar de ${a.substitui}</span>` : "";
+      const inv = a.inverte ? `<span class="w">queda favorece a bolsa</span>` : "";
       return `<div class="tile"><span class="name">${a.nome}</span>
         <span class="val num">${a.valor}</span>
         <span class="chg num ${neg ? "down" : "up"}">${neg ? "▼" : "▲"} ${v}</span>
-        <span class="w">peso ${a.peso}</span></div>`;
+        <span class="w">peso ${a.peso}</span>${nota}${inv}</div>`;
     })
     .join("");
 }

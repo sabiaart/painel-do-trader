@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-11-02T16:31:38-03:00",
+ "gerado_em": "2026-11-02T16:47:42-03:00",
  "origem": "pipeline",
  "exemplo": false,
  "desatualizado": false,
@@ -7,7 +7,12 @@
   "niveis": {
    "situacao": "ok",
    "detalhe": "vol 37.5% a.a. (PTAX de 30/10) · vol 36.4% a.a. (VXEWZ de 30/10)",
-   "em": "2026-11-02T16:31:38-03:00"
+   "em": "2026-11-02T16:47:42-03:00"
+  },
+  "globais": {
+   "situacao": "sem chave",
+   "detalhe": "falta a chave ALPHA_VANTAGE. Crie uma conta gratuita em alphavantage.co e coloque a chave em chaves.env",
+   "em": "2026-11-02T16:47:42-03:00"
   }
  }
 }

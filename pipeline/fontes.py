@@ -89,6 +89,59 @@ def fred_serie(serie: str) -> list[tuple[date, float]]:
     return dados
 
 
+ALPHA = "https://www.alphavantage.co/query"
+
+
+class SemChave(Exception):
+    """Falta a chave de API. Nao e erro de rede: e configuracao."""
+
+
+def alpha_cotacao(simbolo: str, chave: str) -> dict:
+    """Cotacao de um papel na Alpha Vantage.
+
+    Devolve preco, fechamento anterior, variacao em % e a data do pregao.
+
+    O plano gratuito e de 25 consultas por dia. Quando estoura, a resposta
+    vem 200 com um aviso em vez de dados - por isso a checagem abaixo.
+    """
+    from urllib.parse import urlencode
+
+    url = f"{ALPHA}?" + urlencode(
+        {"function": "GLOBAL_QUOTE", "symbol": simbolo, "apikey": chave}
+    )
+    try:
+        bruto = json.loads(baixar(url).decode("utf-8"))
+    except json.JSONDecodeError as erro:
+        raise FonteIndisponivel(f"{simbolo}: resposta nao e JSON ({erro})") from erro
+
+    # Limite diario estourado, ou chave recusada.
+    for campo in ("Note", "Information", "Error Message"):
+        if campo in bruto:
+            raise FonteIndisponivel(f"{simbolo}: {str(bruto[campo])[:160]}")
+
+    cotacao = bruto.get("Global Quote") or {}
+    if not cotacao:
+        raise FonteIndisponivel(f"{simbolo}: resposta sem cotação")
+
+    try:
+        preco = float(cotacao["05. price"])
+        anterior = float(cotacao["08. previous close"])
+        dia = date.fromisoformat(cotacao["07. latest trading day"])
+    except (KeyError, ValueError) as erro:
+        raise FonteIndisponivel(f"{simbolo}: campos faltando ({erro})") from erro
+
+    if preco <= 0 or anterior <= 0:
+        raise FonteIndisponivel(f"{simbolo}: preço zerado")
+
+    return {
+        "simbolo": simbolo,
+        "preco": preco,
+        "anterior": anterior,
+        "variacao": (preco / anterior - 1) * 100,
+        "data": dia,
+    }
+
+
 def dolar_ptax(dias: int = 400) -> list[tuple[date, float]]:
     """Dolar PTAX de venda, diario."""
     return bcb_serie(SERIE_DOLAR, dias=dias)

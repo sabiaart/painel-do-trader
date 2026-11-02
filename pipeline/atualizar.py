@@ -15,6 +15,7 @@ from datetime import date
 import calculos
 import comum
 import fontes
+import indicadores
 
 JANELA_VOL = 21  # pregoes usados na volatilidade historica
 
@@ -106,6 +107,71 @@ def atualizar_niveis() -> dict:
     return resultados
 
 
+def atualizar_globais() -> str:
+    """Placar dos indicadores e grade "O que mexe hoje".
+
+    Os dois saem da mesma busca, para nao gastar o dobro das consultas:
+    o plano gratuito da Alpha Vantage e de 25 por dia e o placar usa 10.
+    """
+    chave = comum.chave("ALPHA_VANTAGE")
+    if not chave:
+        raise fontes.SemChave(
+            "falta a chave ALPHA_VANTAGE. Crie uma conta gratuita em "
+            "alphavantage.co e coloque a chave em chaves.env"
+        )
+
+    coletados = []
+    falhas = []
+    for simbolo, nome, peso, inverte, substitui in indicadores.INDICADORES:
+        try:
+            c = fontes.alpha_cotacao(simbolo, chave)
+        except comum.FonteIndisponivel as erro:
+            falhas.append(str(erro))
+            continue
+        coletados.append(
+            {
+                "nome": nome,
+                "valor": f"{c['preco']:,.2f}".replace(",", "@").replace(".", ",").replace("@", "."),
+                "variacao": round(c["variacao"], 2),
+                "unidade": "%",
+                "peso": peso,
+                "favoravel": indicadores.favoravel(c["variacao"], inverte),
+                "inverte": inverte,
+                "substitui": substitui,
+                "data": c["data"].isoformat(),
+            }
+        )
+
+    # Metade dos indicadores faltando ja nao e um placar: e um palpite.
+    if len(coletados) < len(indicadores.INDICADORES) / 2:
+        raise comum.FonteIndisponivel(
+            f"só {len(coletados)} de {len(indicadores.INDICADORES)} indicadores vieram. "
+            + ("; ".join(falhas[:2]) if falhas else "")
+        )
+
+    origem = "Alpha Vantage (fechamento do pregão anterior)"
+    pregao = max(i["data"] for i in coletados)
+
+    grade = comum.cabecalho(origem)
+    grade["ativos"] = coletados
+    grade["pregao"] = pregao
+    grade["falhas"] = falhas
+    comum.gravar("globais", grade)
+
+    favoraveis = sum(1 for i in coletados if i["favoravel"])
+    placar = comum.cabecalho(origem)
+    placar["favoraveis"] = favoraveis
+    placar["total"] = len(coletados)
+    placar["pregao"] = pregao
+    placar["indicadores"] = [
+        {"nome": i["nome"], "favoravel": i["favoravel"]} for i in coletados
+    ]
+    comum.gravar("placar", placar)
+
+    aviso = f" ({len(falhas)} falharam)" if falhas else ""
+    return f"{favoraveis} de {len(coletados)} a favor, pregão de {pregao}{aviso}"
+
+
 def atualizar_fontes(estado: dict[str, dict]) -> None:
     """Grava o estado de cada fonte, para a pagina /sobre mostrar."""
     dados = comum.cabecalho("pipeline", exemplo=False)
@@ -132,6 +198,22 @@ def main() -> int:
     except comum.FonteIndisponivel as erro:
         comum.manter_anterior("niveis", str(erro))
         estado["niveis"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
+
+    print("\n[globais] placar e grade de mercados")
+    try:
+        resumo = atualizar_globais()
+        houve_sucesso = True
+        print(f"  ok {resumo}")
+        estado["globais"] = {"situacao": "ok", "detalhe": resumo, "em": comum.agora()}
+    except fontes.SemChave as erro:
+        # Falta de chave nao e fonte fora do ar: nada a preservar, nada a
+        # marcar como desatualizado. So avisa e segue.
+        print(f"  - pulado: {erro}")
+        estado["globais"] = {"situacao": "sem chave", "detalhe": str(erro), "em": comum.agora()}
+    except comum.FonteIndisponivel as erro:
+        comum.manter_anterior("globais", str(erro))
+        comum.manter_anterior("placar", str(erro))
+        estado["globais"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
     atualizar_fontes(estado)
 
