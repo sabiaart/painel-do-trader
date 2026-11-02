@@ -1,0 +1,12 @@
+{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
+"ativos":[
+{"nome":"S&P 500 fut.","valor":"5.912","variacao":0.42,"unidade":"%","peso":"alto"},
+{"nome":"Nasdaq fut.","valor":"20.840","variacao":0.61,"unidade":"%","peso":"médio"},
+{"nome":"EWZ","valor":"28,74","variacao":0.85,"unidade":"%","peso":"alto"},
+{"nome":"Vale ADR","valor":"10,12","variacao":1.30,"unidade":"%","peso":"alto"},
+{"nome":"Petrobras ADR","valor":"14,05","variacao":-0.20,"unidade":"%","peso":"médio"},
+{"nome":"Itaú ADR","valor":"6,41","variacao":0.47,"unidade":"%","peso":"médio"},
+{"nome":"Minério Dalian","valor":"812","variacao":1.10,"unidade":"%","peso":"médio"},
+{"nome":"Brent","valor":"73,40","variacao":-0.15,"unidade":"%","peso":"médio"},
+{"nome":"DXY","valor":"104,2","variacao":-0.18,"unidade":"%","peso":"alto"},
+{"nome":"Treasury 10a","valor":"4,31%","variacao":-2,"unidade":"bps","peso":"alto"}]}

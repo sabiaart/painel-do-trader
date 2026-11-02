@@ -1,0 +1,11 @@
+{
+  // Diz ao Cloudflare exatamente o que publicar, em vez de deixar ele adivinhar.
+  // "directory" e a pasta que vira o site. Tudo fora dela (pipeline, prototipo,
+  // documentos) fica no GitHub mas nao vai para o ar.
+  "name": "painel-do-trader",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./site",
+    "not_found_handling": "404-page"
+  }
+}

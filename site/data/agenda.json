@@ -1,0 +1,6 @@
+{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
+"fuso":"horário de Brasília",
+"eventos":[
+{"hora":"08:00","evento":"Boletim Focus","impacto":"medio","historico":"WIN ±0,1% em média"},
+{"hora":"10:30","evento":"Payroll (EUA)","impacto":"alto","historico":"WIN ±0,9% em média no dia"},
+{"hora":"14:30","evento":"Fala de diretor do Fed","impacto":"medio","historico":"WIN ±0,3% em média"}]}

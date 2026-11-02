@@ -1,0 +1,8 @@
+{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
+"favoraveis":7,"total":10,
+"indicadores":[
+{"nome":"S&P 500 fut.","favoravel":true},{"nome":"Nasdaq fut.","favoravel":true},
+{"nome":"EWZ","favoravel":true},{"nome":"Vale ADR","favoravel":true},
+{"nome":"Petrobras ADR","favoravel":false},{"nome":"Itaú ADR","favoravel":true},
+{"nome":"Minério Dalian","favoravel":true},{"nome":"Brent","favoravel":false},
+{"nome":"DXY","favoravel":true},{"nome":"Treasury 10a","favoravel":false}]}

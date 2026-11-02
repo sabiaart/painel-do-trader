@@ -1,0 +1,18 @@
+{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
+"ativo":"BOVA11","vencimento":"20/11","referencia":"fechamento de ontem",
+"preco":124.2,"prazo_anos":0.05555,"vol_implicita":0.19,"juros":0.1075,"razao_ibov":1030,
+"unidade_oi":"contratos",
+"strikes":[
+{"strike":118,"call_oi":20000,"put_oi":380000},
+{"strike":119,"call_oi":15000,"put_oi":220000},
+{"strike":120,"call_oi":40000,"put_oi":610000},
+{"strike":121,"call_oi":30000,"put_oi":290000},
+{"strike":122,"call_oi":80000,"put_oi":330000},
+{"strike":123,"call_oi":120000,"put_oi":180000},
+{"strike":124,"call_oi":250000,"put_oi":150000},
+{"strike":125,"call_oi":310000,"put_oi":90000},
+{"strike":126,"call_oi":440000,"put_oi":60000},
+{"strike":127,"call_oi":280000,"put_oi":30000},
+{"strike":128,"call_oi":520000,"put_oi":40000},
+{"strike":129,"call_oi":190000,"put_oi":15000},
+{"strike":130,"call_oi":360000,"put_oi":20000}]}

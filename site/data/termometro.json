@@ -1,0 +1,10 @@
+{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
+"nota":60,"ontem":54,"semana":41,"mes":33,
+"componentes":[
+{"nome":"Momento do Ibovespa","nota":71},
+{"nome":"Amplitude das ações","nota":58},
+{"nome":"Volatilidade (VIX Ibov)","nota":64},
+{"nome":"Fluxo estrangeiro 5d","nota":69},
+{"nome":"Posição estrangeiro no WIN","nota":40},
+{"nome":"Proteção (put/call)","nota":55},
+{"nome":"Porto seguro (dólar)","nota":66}]}

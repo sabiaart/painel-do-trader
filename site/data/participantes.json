@@ -1,0 +1,7 @@
+{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
+"leitura":"estrangeiro reduziu a posição vendida pelo 3º dia seguido",
+"participantes":[
+{"nome":"Estrangeiro","saldo":-42310,"direcao":"sobe"},
+{"nome":"Institucional","saldo":18940,"direcao":"desce"},
+{"nome":"Pessoa física","saldo":21770,"direcao":"sobe"},
+{"nome":"Inst. financeira","saldo":1600,"direcao":"desce"}]}

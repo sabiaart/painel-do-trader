@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Opções de BOVA11 — contratos em aberto, GEX e gamma flip | Painel do Trader</title>
+<meta name="description" content="Call wall, put wall, gamma flip e GEX total das opções de BOVA11, com o gráfico por strike convertido para pontos do Ibovespa.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/css/painel.css">
+</head>
+<body>
+
+<a class="pular" href="#gex">Pular para o conteúdo</a>
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--bg)" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div>
+      <b>Painel do Trader</b>
+    </div>
+    <div class="status muted"><span class="dot" aria-hidden="true"></span><span>Fechamento anterior</span></div>
+    <nav aria-label="Seções">
+      <a href="/">Painel</a><a href="/opcoes/" aria-current="page">Opções</a><a href="#como-ler">Como ler</a><a href="/sobre/">Sobre</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="sample" id="aviso-exemplo" hidden></p>
+  <div class="ad ad-top">Anúncio · topo</div>
+
+  <div class="cols">
+  <main>
+    <a class="back" href="/">← Voltar ao painel</a>
+
+    <section id="gex" class="panel" >
+      <div id="bloco-gex">
+        <div class="head"><h2 id="gx-titulo">Opções de BOVA11</h2><span class="muted" style="font-size:12px" id="gx-sub"></span></div>
+        <div class="gx-stats" id="gxstats"><p class="carregando">Carregando…</p></div>
+        <div class="ad ad-in">Anúncio · no conteúdo</div>
+        <div class="head" style="margin:0">
+          <span class="label" id="gxtitle">Contratos em aberto por strike</span>
+          <div class="seg" role="group" aria-label="Visualização">
+            <button type="button" class="gxb on" data-m="oi" aria-pressed="true">Em aberto</button>
+            <button type="button" class="gxb" data-m="gex" aria-pressed="false">GEX</button>
+          </div>
+        </div>
+        <div class="gx-legend"><span id="gxl">◄ Puts</span><span id="gxr">Calls ►</span></div>
+        <div class="gx-chart" id="gxchart" role="img"></div>
+        <p class="read" id="gx-nota"></p>
+      </div>
+    </section>
+
+    <section id="como-ler" class="panel">
+      <div class="head"><h2>Como ler esta página</h2></div>
+      <ul class="howto">
+        <li><b>Contratos em aberto</b> é quanta gente ainda tem posição viva em cada strike. Puts à esquerda, calls à direita.</li>
+        <li><b>Call wall</b> é o strike com mais gamma de calls. Costuma atrair atenção como zona acima do preço.</li>
+        <li><b>Put wall</b> é o equivalente nas puts, abaixo do preço.</li>
+        <li><b>Gamma flip</b> é o preço em que o GEX total muda de sinal. Acima dele, as oscilações tendem a ser amortecidas. Abaixo, ampliadas.</li>
+        <li><b>GEX total</b> estima quantos reais os formadores de mercado precisariam negociar a cada 1% de variação do preço.</li>
+        <li>Os dados são do fechamento anterior e mudam a cada pregão, principalmente perto do vencimento.</li>
+      </ul>
+    </section>
+  </main>
+
+  <aside aria-label="Publicidade">
+    <div class="ad ad-side tall">Anúncio · lateral</div>
+    <div class="ad ad-side">Anúncio · 300×250</div>
+  </aside>
+  </div>
+
+  <footer>
+    <div class="rodape-links">
+      <a href="/">Painel</a>
+      <a href="/sobre/">Sobre e metodologia</a>
+      <a href="/privacidade/">Privacidade</a>
+      <a href="/termos/">Termos de uso</a>
+    </div>
+    Conteúdo informativo, não é recomendação de investimento.
+    Os níveis desta página são zonas de interesse estatístico, não suporte ou resistência garantidos.
+  </footer>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<script type="module" src="/js/opcoes.js"></script>
+</body>
+</html>

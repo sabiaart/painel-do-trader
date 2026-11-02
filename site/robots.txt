@@ -1,0 +1,4 @@
+# Enquanto o site esta em construcao, nada e indexado.
+# Na Fase 7 isto vira "Allow: /" junto com o sitemap.
+User-agent: *
+Disallow: /

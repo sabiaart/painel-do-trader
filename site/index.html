@@ -2,88 +2,221 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Painel do Trader — em construção</title>
-<meta name="description" content="Painel gratuito de contexto do mercado brasileiro para quem opera mini índice (WIN) e mini dólar (WDO). Em construção.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel do Trader — contexto do mercado brasileiro para WIN e WDO</title>
+<meta name="description" content="Pré-mercado, fluxo estrangeiro, posicionamento, termômetro de medo e ganância, movimento esperado e agenda do dia para quem opera mini índice e mini dólar. Grátis.">
 <meta name="robots" content="noindex">
-<style>
-:root{
-  --bg:#0E1318; --panel:#151C23; --line:#26313B; --fg:#E4EAEF; --muted:#93A1AE;
-  --accent:#4FB8A0; --chip:#1C252E;
-  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
-  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  color-scheme:dark;
-}
-@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
-  --bg:#F3F5F6; --panel:#FFFFFF; --line:#DCE2E7; --fg:#15202A; --muted:#566573;
-  --accent:#16806A; --chip:#EAEFF2; color-scheme:light } }
-
-*{box-sizing:border-box}
-body{
-  margin:0; background:var(--bg); color:var(--fg); font-family:var(--body);
-  line-height:1.55; display:flex; flex-direction:column; min-height:100vh;
-}
-main{
-  flex:1; width:100%; max-width:640px; margin:0 auto;
-  padding:48px 16px; display:flex; flex-direction:column; justify-content:center;
-}
-.selo{
-  display:inline-block; align-self:flex-start; font-family:var(--mono);
-  font-size:12px; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--accent); background:var(--chip); border:1px solid var(--line);
-  border-radius:999px; padding:5px 12px; margin-bottom:20px;
-}
-h1{
-  font-family:var(--display); font-weight:600; font-size:clamp(28px,8vw,44px);
-  line-height:1.1; margin:0 0 14px;
-}
-.sub{color:var(--muted); font-size:clamp(15px,4vw,17px); margin:0 0 32px}
-.card{
-  background:var(--panel); border:1px solid var(--line); border-radius:12px;
-  padding:20px;
-}
-.card h2{
-  font-family:var(--display); font-size:15px; text-transform:uppercase;
-  letter-spacing:.05em; color:var(--muted); font-weight:600; margin:0 0 12px;
-}
-ol{margin:0; padding-left:22px}
-ol li{margin-bottom:7px}
-ol li:last-child{margin-bottom:0}
-ol li.feito{color:var(--muted)}
-footer{
-  border-top:1px solid var(--line); padding:20px 16px;
-  font-size:13px; color:var(--muted); text-align:center;
-}
-footer a{color:var(--muted)}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/css/painel.css">
 </head>
 <body>
-<main>
-  <span class="selo">Em construção</span>
-  <h1>Painel do Trader</h1>
-  <p class="sub">
-    Contexto do mercado brasileiro em uma tela só, para quem opera
-    mini índice (WIN) e mini dólar (WDO). Gratuito.
-  </p>
 
-  <div class="card">
-    <h2>Como está o projeto</h2>
-    <ol>
-      <li class="feito">Base: repositório e publicação automática <strong>— feito</strong></li>
-      <li>Site com dados de exemplo</li>
-      <li>Dados públicos (Banco Central, FRED, mercados globais)</li>
-      <li>Dados da B3</li>
-      <li>Resumos escritos por IA</li>
-      <li>Página de opções de BOVA11</li>
-      <li>Enquete, card do dia e alertas no Telegram</li>
-    </ol>
+<a class="pular" href="#pre">Pular para o conteúdo</a>
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--bg)" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div>
+      <b>Painel do Trader</b>
+    </div>
+    <div class="status muted"><span class="dot" aria-hidden="true"></span><span>Pré-mercado · dados de fim de dia</span></div>
+    <nav aria-label="Seções">
+      <a href="#pre" aria-current="page">Pré-mercado</a><a href="#globais">Globais</a><a href="#sentimento">Sentimento</a><a href="#humor">Humor</a><a href="#fluxo">Fluxo</a><a href="#niveis">Níveis</a><a href="/opcoes/">Opções</a><a href="#calc">Calculadora</a><a href="#agenda">Agenda</a>
+    </nav>
   </div>
-</main>
+</header>
 
-<footer>
-  Conteúdo informativo, não é recomendação de investimento.<br>
-  <a href="https://github.com/sabiaart/painel-do-trader">Código aberto no GitHub</a>
-</footer>
+<div class="wrap">
+  <p class="sample" id="aviso-exemplo" hidden></p>
+  <div class="ad ad-top">Anúncio · topo</div>
+
+  <div class="cols">
+  <main>
+
+    <section id="pre" class="panel">
+      <div class="bias">
+        <div class="bias-score">
+          <span class="label">Placar dos indicadores · WIN</span>
+          <span class="bias-big" id="placar-num">—</span>
+          <div class="meter" id="meter" aria-label="Placar dos indicadores do pré-mercado"></div>
+          <span class="muted" style="font-size:13px">indicadores do pré-mercado apontam para alta</span>
+        </div>
+        <div class="summary">
+          <span class="label">Resumo do dia</span>
+          <ul id="resumo-lista"><li class="carregando">Carregando…</li></ul>
+          <div class="btns">
+            <button class="primary" id="share" type="button">Gerar card do dia</button>
+            <a class="ghost btnlink" href="#alertas">Alertas no Telegram</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="globais">
+      <div class="head"><h2>O que mexe hoje</h2><span class="muted" style="font-size:12px">peso no WIN</span></div>
+      <div class="tiles" id="tiles"><p class="carregando">Carregando…</p></div>
+    </section>
+
+    <!-- No celular a coluna lateral desce para o fim da página, onde quase
+         ninguém chega. Por isso existe este anúncio entre blocos. -->
+    <div class="ad ad-in ad-meio">Anúncio · entre blocos</div>
+
+    <section id="sentimento" class="duo">
+      <div class="panel" id="bloco-termometro">
+        <div class="head"><h2>Termômetro do mercado</h2><span class="muted" style="font-size:12px">0 = medo · 100 = ganância</span></div>
+        <div class="gauge-wrap">
+          <svg class="gauge" id="gauge" viewBox="0 0 220 124" role="img" aria-label="Termômetro do mercado"></svg>
+          <span class="g-val num" id="gval">—</span>
+          <span class="g-zone" id="gzone"></span>
+          <span class="g-prev" id="gprev"></span>
+        </div>
+        <ul class="comps" id="comps" aria-label="Componentes do termômetro"></ul>
+      </div>
+
+      <div class="panel" id="bloco-noticias">
+        <div class="head"><h2>Tom das notícias</h2><span class="ai-tag">Leitura por IA</span></div>
+        <span class="label">Saldo das manchetes de hoje</span>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><b class="g-val" style="font-size:26px" id="news-saldo">—</b></div>
+        <div class="split" id="split" role="img"></div>
+        <div class="legend" id="news-legenda"></div>
+        <ul class="heads" id="heads"></ul>
+        <p class="read">Separado do termômetro: classificação automática de manchetes, sujeita a erro.</p>
+      </div>
+    </section>
+
+    <section id="humor" class="panel">
+      <div class="head"><h2>Humor da comunidade</h2><span class="muted" style="font-size:12px" id="pollcount"></span></div>
+      <span style="font-size:15px" id="enquete-pergunta"></span>
+      <div class="poll" role="group" aria-label="Seu posicionamento hoje">
+        <button type="button" class="pollb" data-o="c" aria-pressed="false">Comprado</button>
+        <button type="button" class="pollb" data-o="v" aria-pressed="false">Vendido</button>
+        <button type="button" class="pollb" data-o="f" aria-pressed="false">De fora</button>
+      </div>
+      <ul class="comps" id="pollres" aria-label="Resultado da enquete"></ul>
+      <p class="read" id="enquete-contraste"></p>
+    </section>
+
+    <section id="fluxo" class="duo">
+      <div class="panel" id="bloco-fluxo">
+        <div class="head"><h2>Fluxo estrangeiro</h2><span class="muted" style="font-size:12px">R$ bi · 20 pregões</span></div>
+        <svg class="chart" id="flow" viewBox="0 0 320 150" role="img" aria-label="Fluxo estrangeiro"></svg>
+        <div class="stats" id="fluxo-stats"></div>
+      </div>
+      <div class="panel" id="bloco-participantes">
+        <div class="head"><h2>Quem está comprado no WIN</h2></div>
+        <div class="tablebox"><table>
+          <thead><tr><th>Participante</th><th class="r">Saldo</th><th class="r">5 dias</th></tr></thead>
+          <tbody id="players"></tbody>
+        </table></div>
+        <p class="read" id="players-leitura"></p>
+      </div>
+    </section>
+
+    <section id="niveis" class="duo">
+      <div class="panel">
+        <div class="head"><h2 id="win-titulo">WIN · mini índice</h2><span class="pill medio" id="win-venc"></span></div>
+        <div class="kv">
+          <div><span>Ajuste anterior</span><b id="win-ajuste">—</b></div>
+          <div><span>Gap previsto</span><b id="win-gap">—</b></div>
+          <div><span>Máx. ontem</span><b id="win-max">—</b></div>
+          <div><span>Mín. ontem</span><b id="win-min">—</b></div>
+        </div>
+        <div class="exp">
+          <div class="exp-row"><span class="label">Movimento esperado hoje</span><b class="num" id="win-desvio">—</b></div>
+          <div class="track" id="win-track" role="img"><div class="band2"></div><div class="band1"></div><div class="mid"></div></div>
+          <div class="ends"><span id="win-lo">—</span><span class="muted">68% dos dias</span><span id="win-hi">—</span></div>
+          <span class="hit" id="win-hit"></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="head"><h2 id="wdo-titulo">WDO · mini dólar</h2><span class="pill medio" id="wdo-venc"></span></div>
+        <div class="kv">
+          <div><span>Ajuste anterior</span><b id="wdo-ajuste">—</b></div>
+          <div><span>Gap previsto</span><b id="wdo-gap">—</b></div>
+          <div><span>Máx. ontem</span><b id="wdo-max">—</b></div>
+          <div><span>Mín. ontem</span><b id="wdo-min">—</b></div>
+        </div>
+        <div class="exp">
+          <div class="exp-row"><span class="label">Movimento esperado hoje</span><b class="num" id="wdo-desvio">—</b></div>
+          <div class="track" id="wdo-track" role="img"><div class="band2"></div><div class="band1"></div><div class="mid"></div></div>
+          <div class="ends"><span id="wdo-lo">—</span><span class="muted">68% dos dias</span><span id="wdo-hi">—</span></div>
+          <span class="hit" id="wdo-hit"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="head"><h2>Opções de BOVA11</h2></div>
+      <p style="margin:0 0 12px">Contratos em aberto por strike, GEX, call wall, put wall e gamma flip, em página própria.</p>
+      <a class="primary btnlink" href="/opcoes/">Ver contratos em aberto, GEX e gamma flip</a>
+    </section>
+
+    <section id="calc" class="panel">
+      <div class="head"><h2>Onde o preço está na faixa</h2><span class="muted" style="font-size:12px">você informa o preço</span></div>
+      <p class="muted" style="margin:0 0 12px;font-size:14px">Digite o preço que aparece na sua plataforma. O cálculo usa o ajuste anterior e o movimento esperado de hoje.</p>
+      <div class="calc-form">
+        <div class="seg" role="group" aria-label="Ativo">
+          <button type="button" class="segb on" data-a="win" aria-pressed="true">WIN</button>
+          <button type="button" class="segb" data-a="wdo" aria-pressed="false">WDO</button>
+        </div>
+        <label class="field" for="price"><span>Preço atual</span><input id="price" inputmode="decimal" autocomplete="off"></label>
+      </div>
+      <p class="calc-msg" id="calcmsg"></p>
+      <div class="calc-out" id="calcout" hidden>
+        <div class="exp-row"><span class="label">Movimento esperado percorrido</span><b class="num" id="pct">—</b></div>
+        <div class="track" role="img" aria-label="Posição do preço em relação às faixas de 1 e 2 desvios"><div class="band2"></div><div class="band1"></div><div class="mid"></div><div class="mark" id="mark"></div></div>
+        <div class="ends"><span id="e-lo">—</span><span class="muted">ajuste no centro</span><span id="e-hi">—</span></div>
+        <span class="zone z1" id="zone"></span>
+        <span class="muted" style="font-size:13px" id="disp"></span>
+        <span class="hit" id="next"></span>
+      </div>
+      <p class="read" id="calc-fechamento" hidden></p>
+    </section>
+
+    <section id="alertas" class="panel">
+      <div class="head"><h2>Alertas no Telegram</h2><span class="muted" style="font-size:12px">grátis · até 4 por dia</span></div>
+      <div class="tg">
+        <span class="label">Exemplo de alerta</span>
+        <p>WIN rompeu a faixa de 1 desvio. Veja o que aconteceu nos dias parecidos com hoje.</p>
+        <span class="muted" style="font-size:12px">[seusite].com.br/hoje</span>
+      </div>
+      <div class="moments"><span>Abertura</span><span>Eventos da agenda</span><span>Rompimento de faixa</span><span>Fechamento</span></div>
+      <button class="primary" id="tg" type="button">Entrar no canal</button>
+    </section>
+
+    <section id="agenda" class="panel">
+      <div class="head"><h2>Agenda que move o mercado</h2><span class="muted" style="font-size:12px" id="agenda-fuso"></span></div>
+      <div id="events"><p class="carregando">Carregando…</p></div>
+    </section>
+
+  </main>
+
+  <aside aria-label="Publicidade e parceiros">
+    <div class="ad ad-side tall">Anúncio · lateral</div>
+    <div class="panel partner">
+      <span class="label">Parceiro</span>
+      <b style="font-family:var(--display);font-size:17px">[Corretora parceira]</b>
+      <span class="muted" style="font-size:13px">Espaço para afiliado: corretagem zero no mini índice.</span>
+    </div>
+    <div class="ad ad-side">Anúncio · 300×250</div>
+  </aside>
+  </div>
+
+  <footer>
+    <div class="rodape-links">
+      <a href="/sobre/">Sobre e metodologia</a>
+      <a href="/privacidade/">Privacidade</a>
+      <a href="/termos/">Termos de uso</a>
+      <a href="https://github.com/sabiaart/painel-do-trader">Código aberto</a>
+    </div>
+    Conteúdo informativo, não é recomendação de investimento.
+    Fontes previstas: B3 (arquivos públicos), Banco Central, APIs de mercados globais.
+  </footer>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<script type="module" src="/js/painel.js"></script>
 </body>
 </html>

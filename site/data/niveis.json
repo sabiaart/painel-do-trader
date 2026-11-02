@@ -1,0 +1,11 @@
+{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
+"metodo_volatilidade":"exemplo",
+"ativos":{
+"win":{"nome":"WIN · mini índice","ajuste":128450,"gap":320,"maxima":129105,"minima":127880,
+"desvio":1375,"casas":0,"dias_vencimento":9,"exemplo_preco":"129.200",
+"faixa_ampliada":null,"acertos":21,"janela":30,
+"fechamento":"ontem o WIN percorreu 118% do movimento esperado"},
+"wdo":{"nome":"WDO · mini dólar","ajuste":5412.5,"gap":-11.0,"maxima":5438.0,"minima":5396.5,
+"desvio":41,"casas":1,"dias_vencimento":30,"exemplo_preco":"5.436,0",
+"faixa_ampliada":"Dia de Payroll: faixa ampliada em 30%","acertos":22,"janela":30,
+"fechamento":null}}}
