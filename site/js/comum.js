@@ -85,3 +85,9 @@ export function aviso(msg) {
 export function semDado(el, nome) {
   if (el) el.innerHTML = `<p class="erro">Não foi possível carregar ${nome} agora. O restante da página continua funcionando.</p>`;
 }
+
+/* "1 pregão" e nao "1 pregões". O painel escreve numero de pregao em varios
+   lugares e um "1 pregões" na tela faz o resto parecer descuidado. */
+export function plural(n, singular, plural) {
+  return `${n} ${n === 1 ? singular : plural}`;
+}

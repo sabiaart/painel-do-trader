@@ -18,3 +18,13 @@ Thumbs.db
 
 # Chaves de API. Fica so no seu computador.
 chaves.env
+
+# Arquivos da B3 baixados a mao. Ficam so no seu computador: os dados sao
+# da B3 e este repositorio e publico.
+b3-manual/*
+!b3-manual/LEIA-ME.md
+
+# Os dois blocos que vem da B3. Mesma razao: nao redistribuir num repo
+# publico o que a B3 licencia para consulta.
+site/data/fluxo.json
+site/data/participantes.json

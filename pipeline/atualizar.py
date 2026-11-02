@@ -17,6 +17,8 @@ import calculos
 import comum
 import fontes
 import indicadores
+import manuais
+from planilha import PlanilhaIlegivel
 
 JANELA_VOL = 21  # pregoes usados na volatilidade historica
 PAUSA_ENTRE_CONSULTAS = 1.5  # segundos; a Alpha Vantage aceita 1 por segundo
@@ -274,6 +276,28 @@ def main() -> int:
         comum.manter_anterior("globais", str(erro))
         comum.manter_anterior("placar", str(erro))
         estado["globais"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
+
+    # --- Blocos que vem de arquivo baixado a mao ---
+    #
+    # O robo NUNCA acessa b3.com.br: a B3 proibe coleta automatizada. Ele le
+    # o que estiver em b3-manual/. Pasta vazia nao e falha: e so nao ter
+    # arquivo novo hoje, e o dado de ontem continua valendo.
+    for nome, rotulo, funcao in (
+        ("fluxo", "fluxo estrangeiro", manuais.atualizar_fluxo),
+        ("participantes", "posições por participante", manuais.atualizar_participantes),
+    ):
+        print(f"\n[{nome}] {rotulo} (arquivo da B3 baixado a mão)")
+        try:
+            resumo = funcao()
+            houve_sucesso = True
+            print(f"  ok {resumo}")
+            estado[nome] = {"situacao": "ok", "detalhe": resumo, "em": comum.agora()}
+        except manuais.SemArquivo as erro:
+            print(f"  - pulado: {erro}. Veja b3-manual/LEIA-ME.md")
+            estado[nome] = {"situacao": "sem arquivo", "detalhe": str(erro), "em": comum.agora()}
+        except (comum.FonteIndisponivel, PlanilhaIlegivel) as erro:
+            comum.manter_anterior(nome, str(erro))
+            estado[nome] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
     atualizar_fontes(estado)
 

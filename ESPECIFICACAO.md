@@ -326,3 +326,25 @@ site publico, a pergunta continua aberta.
 - **Pergunte antes de** contratar qualquer serviço pago, criar contas em nome dele ou publicar algo no domínio definitivo.
 - Faça commits pequenos e frequentes, com mensagens claras em português.
 - Ao terminar cada fase, mostre o resultado no navegador e liste o que ficou pendente.
+
+### Acrescentado em 02/11/2026: download manual da B3
+
+Os dois blocos que nenhuma API gratuita cobre - fluxo estrangeiro (4.7) e
+posicoes por participante (4.8) - passam a vir de arquivo baixado a mao.
+
+- Pasta de entrada: `b3-manual/`, com instrucoes em `b3-manual/LEIA-ME.md`.
+- Leitor: `pipeline/planilha.py` (CSV e XLSX, so biblioteca padrao) e
+  `pipeline/manuais.py` (interpreta e acumula historico).
+- **O robo nunca acessa b3.com.br.** Le so o que ja esta no computador.
+- Pasta vazia nao e falha: o bloco mantem o ultimo dado valido com a data.
+
+**Decisao tomada sem consultar: os dois JSON sairam do Git.** O repositorio e
+publico e `site/data/fluxo.json` e `site/data/participantes.json` passariam a
+conter dado derivado da B3. Consultar e uma coisa; republicar num repositorio
+aberto e outra, com outra licenca. Eles agora sao gerados so no computador
+local. Efeito colateral: no site hospedado esses dois blocos ficam sem dado
+ate que se decida o contrario.
+
+- [ ] Confirmar os caminhos de menu no site da B3 para os dois relatorios.
+      Foram escritos de memoria, sem acessar o site.
+- [ ] Decidir se os dois JSON voltam para o Git quando o site for publico.

@@ -2,7 +2,7 @@
    Cada bloco le o seu proprio JSON de site/data/ e se vira sozinho:
    se um arquivo falhar, os outros blocos continuam funcionando. */
 
-import { fmt, parsePreco, carregar, marcarBloco, aviso, semDado } from "./comum.js";
+import { fmt, parsePreco, carregar, marcarBloco, aviso, semDado, plural } from "./comum.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -228,11 +228,24 @@ async function fluxo() {
     `Fluxo estrangeiro diário dos últimos ${d.pregoes.length} pregões, em ${d.unidade}`
   );
 
-  const sinal = (v, c) => `<b class="num ${v >= 0 ? "up" : "down"}">${v >= 0 ? "+" : "−"}${fmt(Math.abs(v), c)}</b>`;
+  /* null = não há pregão desse mês ou ano no histórico. Mostrar "0,0" se
+     leria como "não houve fluxo", que é outra coisa. */
+  const sinal = (v, c) =>
+    v == null
+      ? `<b class="num muted">—</b>`
+      : `<b class="num ${v >= 0 ? "up" : "down"}">${v >= 0 ? "+" : "−"}${fmt(Math.abs(v), c)}</b>`;
+  /* Com download manual, mes e ano somam so os pregoes que ja foram
+     baixados. Dizer "Ano −12,7" sem essa ressalva seria mentira. */
+  const n = d.pregoes_no_historico || d.pregoes.length;
+  $("fluxo-escala").textContent = `${d.unidade} · ${plural(d.pregoes.length, "pregão", "pregões")}`;
+  const parcial = d.parcial
+    ? `<span class="muted">Mês e ano somam só ${plural(n, "pregão", "pregões")} já baixado${n === 1 ? "" : "s"}.</span>`
+    : "";
   $("fluxo-stats").innerHTML =
     `<span class="muted">Ontem ${sinal(d.ontem, 2)}</span>` +
     `<span class="muted">Mês ${sinal(d.mes, 1)}</span>` +
-    `<span class="muted">Ano ${sinal(d.ano, 1)}</span>`;
+    `<span class="muted">Ano ${sinal(d.ano, 1)}</span>` +
+    parcial;
 }
 
 /* ---------------- 4.8 Quem esta comprado no WIN ---------------- */
@@ -243,13 +256,23 @@ async function participantes() {
 
   $("players").innerHTML = d.participantes
     .map((p) => {
-      const sobe = p.direcao === "sobe";
       const saldo = `${p.saldo >= 0 ? "+" : "−"}${fmt(Math.abs(p.saldo))}`;
-      /* seta mais texto: a cor sozinha nunca carrega a informação */
-      return `<tr><td>${p.nome}</td><td class="r num">${saldo}</td><td class="r ${sobe ? "up" : "down"}">${sobe ? "▲" : "▼"} <span style="font-size:11px">${sobe ? "subiu" : "caiu"}</span></td></tr>`;
+      /* seta mais texto: a cor sozinha nunca carrega a informação.
+         Sem pregão anterior não há direção, e aí não se desenha seta. */
+      let direcao = `<span class="muted">—</span>`;
+      if (p.direcao) {
+        const sobe = p.direcao === "sobe";
+        direcao = `<span class="${sobe ? "up" : "down"}">${sobe ? "▲" : "▼"} <span style="font-size:11px">${sobe ? "subiu" : "caiu"}</span></span>`;
+      }
+      return `<tr><td>${p.nome}</td><td class="r num">${saldo}</td><td class="r">${direcao}</td></tr>`;
     })
     .join("");
-  $("players-leitura").innerHTML = `Leitura: <b>${d.leitura}.</b>`;
+  /* A seta compara com 5 pregoes atras. Nos primeiros dias de download
+     manual ainda nao ha 5, e a tela precisa avisar. */
+  const base = d.parcial
+    ? ` <span class="muted">A comparação ainda usa só ${plural(d.pregoes_no_historico, "pregão", "pregões")}.</span>`
+    : "";
+  $("players-leitura").innerHTML = `Leitura: <b>${d.leitura}.</b>${base}`;
 }
 
 /* ---------------- 4.9 Niveis do dia + 4.10 Calculadora ---------------- */
