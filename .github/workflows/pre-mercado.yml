@@ -1,0 +1,61 @@
+# Robo do pre-mercado.
+#
+# Roda todo dia util de manha, baixa os dados das fontes publicas, recalcula
+# o movimento esperado e grava os JSON em site/data/. O commit que ele faz
+# dispara o deploy no Cloudflare sozinho.
+#
+# Horario: 09:40 UTC = 06:40 em Brasilia. A especificacao pede o painel
+# pronto por volta das 7h, e o agendador do GitHub costuma atrasar alguns
+# minutos, entao o disparo fica 20 minutos antes.
+
+name: Pré-mercado
+
+on:
+  schedule:
+    - cron: "40 9 * * 1-5"
+  workflow_dispatch: # permite rodar na mao pelo site do GitHub
+
+# O robo precisa poder gravar o commit com os dados novos.
+permissions:
+  contents: write
+
+# Se uma execucao ainda estiver rodando, nao comeca outra por cima.
+concurrency:
+  group: pre-mercado
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # O pipeline usa só a biblioteca padrão do Python. Não há o que instalar.
+      - name: Rodar o pipeline
+        working-directory: pipeline
+        run: python atualizar.py
+
+      # Roda mesmo se o pipeline falhar. Quando uma fonte cai, o pipeline não
+      # apaga nada: só marca o arquivo como desatualizado, e esse aviso precisa
+      # chegar ao site para a tela poder dizer "último dado válido, de tal dia".
+      # A execução continua vermelha no GitHub, para você receber o aviso.
+      - name: Publicar os dados novos
+        if: always()
+        run: |
+          git config user.name "Robô do Painel"
+          git config user.email "actions@github.com"
+          git add site/data
+          if git diff --cached --quiet; then
+            echo "Nenhum dado mudou. Nada a publicar."
+            exit 0
+          fi
+          git commit -m "Dados do pré-mercado de $(TZ=America/Sao_Paulo date '+%d/%m/%Y %H:%M')"
+          git push

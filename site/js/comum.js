@@ -35,7 +35,12 @@ export function marcarOrigem(dados, elId = "aviso-exemplo") {
   const quando = dados.gerado_em
     ? new Date(dados.gerado_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
     : null;
-  if (dados.exemplo) {
+  /* Fonte fora do ar: o pipeline manteve o dado anterior e marcou isso.
+     A tela precisa dizer de quando é o número, nunca fingir que é de hoje. */
+  if (dados.desatualizado) {
+    el.innerHTML = `A fonte não respondeu na última atualização. ` +
+      `Mostrando o <b>último dado válido</b>${quando ? `, de ${quando}` : ""}.`;
+  } else if (dados.exemplo) {
     el.innerHTML = `Esta página mostra <b>dados de exemplo</b>. Nenhum número é real.` +
       (quando ? ` <span class="muted">Arquivo de ${quando}.</span>` : "");
   } else if (quando) {

@@ -265,10 +265,28 @@ async function niveis() {
       `Faixa de 1 desvio entre ${fmt(lo1, c)} e ${fmt(hi1, c)}; faixa de 2 desvios entre ${fmt(lo2, c)} e ${fmt(hi2, c)}`
     );
 
-    const extra = a.faixa_ampliada
-      ? `${a.faixa_ampliada} · `
-      : `2 desvios (95%): ${fmt(lo2, c)} a ${fmt(hi2, c)} · `;
-    $(`${chave}-hit`).textContent = `${extra}Faixa respeitada em ${a.acertos} dos últimos ${a.janela} pregões`;
+    /* O placar de acerto só aparece quando existe de verdade. Número de
+       exemplo ao lado de volatilidade real passaria por medida aferida. */
+    const partes = [];
+    if (a.faixa_ampliada) partes.push(a.faixa_ampliada);
+    partes.push(`2 desvios (95%): ${fmt(lo2, c)} a ${fmt(hi2, c)}`);
+    if (a.acertos != null) {
+      partes.push(`Faixa respeitada em ${a.acertos} dos últimos ${a.janela} pregões`);
+    }
+    $(`${chave}-hit`).textContent = partes.join(" · ");
+
+    /* De onde saiu a largura da faixa. O painel sempre diz qual método usou. */
+    const vol = a.volatilidade;
+    const linhaVol = $(`${chave}-vol`);
+    if (vol) {
+      const dia = new Date(`${vol.data}T12:00:00`).toLocaleDateString("pt-BR");
+      linhaVol.innerHTML =
+        `Volatilidade <b>${fmt(vol.anual_pct, 1)}% ao ano</b>, ${vol.metodo}, de ${dia}. ` +
+        `Fonte: ${vol.fonte}. O ajuste anterior ainda é de exemplo.`;
+      linhaVol.hidden = false;
+    } else {
+      linhaVol.hidden = true;
+    }
   }
 
   /* Calculadora: o usuário digita o preço que vê na plataforma dele. */
