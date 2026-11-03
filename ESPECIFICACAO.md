@@ -600,3 +600,41 @@ call wall 172, put wall 164, GEX +R$ 29,4 mi.
 
 - [ ] Entender por que a B3 informa posicao em serie que o cadastro dela
       nao lista.
+
+### Acrescentado em 02/11/2026: volatilidade implicita por serie
+
+O gamma deixou de usar uma volatilidade unica. Agora cada serie tem a sua,
+tirada do premio de fechamento dela por Black-Scholes invertido
+(`calculos.volatilidade_implicita`, bisseccao).
+
+Bisseccao e nao Newton-Raphson: e mais lenta, mas nao diverge. Divergir
+aqui produziria um numero absurdo com cara de resposta.
+
+Devolve nulo quando nao ha resposta sensata - premio abaixo do valor
+intrinseco (premio velho de serie que nao negociou), premio zero, ou
+volatilidade encostando no teto da busca.
+
+**O que os numeros reais mostraram (30/10, vencimento 19/11):**
+
+- Calls entre 19% e 22%; puts entre 23% e 25%. Put mais cara que call no
+  mesmo strike e o skew classico de renda variavel - bom sinal de que a
+  conta esta certa.
+- **O VXEWZ, que era a volatilidade unica, marcava 36,4%** contra ~21% do
+  mercado real de BOVA11. Nao e erro do VXEWZ: ele e do EWZ, cotado em
+  dolar, e carrega a volatilidade do cambio junto. Como proxy de
+  volatilidade de opcao brasileira, estava 70% acima.
+- A reserva para serie que nao negociou passou a ser a **mediana das
+  series negociadas na janela do grafico** (22,1%). A mediana de TODAS as
+  series do vencimento daria 27,6%, puxada pelas asas do sorriso.
+
+**Defeito corrigido junto:** a busca do gamma flip varria de 110 a 140,
+faixa fixa herdada do exemplo. Com o BOVA11 a 165 ela nunca achava nada, e
+o painel mostrava "—" como se nao houvesse flip. Agora a faixa acompanha o
+preco (85% a 115%).
+
+Leitura final: call wall 172, put wall 164, gamma flip 156,95,
+GEX +R$ 49,3 mi.
+
+- [ ] Black-Scholes nao considera dividendos. O BOVA11 distribui pouco,
+      mas isso empurra a volatilidade das calls para baixo e a das puts
+      para cima.

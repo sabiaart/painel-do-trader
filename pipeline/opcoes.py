@@ -32,6 +32,7 @@ from __future__ import annotations
 from datetime import date, datetime
 
 import b3
+import calculos
 import comum
 
 # Para incluir outro ativo, acrescente aqui. So isto.
@@ -167,22 +168,68 @@ def coletar(dia: date | None = None) -> dict:
     preco = b3.valor_de_etf(dia, alvo["codigo"])
     fonte_preco = "IOPV da B3 (valor de referência da cesta do ETF)"
 
-    # Agrupa por strike, somando call e put.
+    # Premio de cada serie, para achar a volatilidade implicita dela.
+    premios = b3.fechamentos(dia, set(do_vencimento))
+
+    vencimento_data = date.fromisoformat(vencimento)
+    prazo_anos_calc = max((vencimento_data - dia).days, 1) / 365
+    juros, fonte_juros = _juros()
+
+    # Agrupa por strike, somando call e put e guardando a volatilidade de
+    # cada lado. Call e put do mesmo strike tem volatilidades diferentes -
+    # e justamente essa diferenca que o "sorriso" descreve.
     por_strike: dict[float, dict] = {}
-    for dados in do_vencimento.values():
-        linha = por_strike.setdefault(dados["strike"], {"call_oi": 0, "put_oi": 0})
-        linha["call_oi" if dados["tipo"] == "call" else "put_oi"] += dados["posicoes"]
+    for papel, dados in do_vencimento.items():
+        linha = por_strike.setdefault(
+            dados["strike"], {"call_oi": 0, "put_oi": 0, "iv_call": None, "iv_put": None}
+        )
+        lado = dados["tipo"]
+        linha["call_oi" if lado == "call" else "put_oi"] += dados["posicoes"]
+
+        premio = premios.get(papel)
+        if not premio:
+            continue
+        vol = calculos.volatilidade_implicita(
+            lado, premio, preco, dados["strike"], prazo_anos_calc, juros
+        )
+        if vol is None:
+            continue
+        # Varias series no mesmo strike e lado sao raras, mas acontecem.
+        # Fica com a da serie mais negociada, que e a de premio confiavel.
+        chave = f"iv_{lado}"
+        atual = linha.get(chave)
+        if atual is None or dados["posicoes"] > linha.get(f"oi_{lado}", 0):
+            linha[chave] = round(vol, 4)
+            linha[f"oi_{lado}"] = dados["posicoes"]
 
     # Mantem os strikes em volta do preco: a cauda e ruido no grafico.
     ordenados = sorted(por_strike)
     perto = min(range(len(ordenados)), key=lambda i: abs(ordenados[i] - preco))
     recorte = ordenados[max(0, perto - STRIKES_POR_LADO) : perto + STRIKES_POR_LADO + 1]
 
-    vencimento_data = date.fromisoformat(vencimento)
     prazo_dias = max((vencimento_data - hoje).days, 1)
 
-    vol, fonte_vol = _volatilidade()
-    juros, fonte_juros = _juros()
+    # Volatilidade de reserva, para a serie que nao negociou no dia.
+    #
+    # A mediana das series que NEGOCIARAM e muito melhor que o VXEWZ aqui:
+    # medido em 30/10, as opcoes de BOVA11 estavam a ~21% e o VXEWZ marcava
+    # 36,4%. O VXEWZ e do EWZ, que e cotado em dolar e carrega a
+    # volatilidade do cambio junto - outra coisa.
+    # So as series da janela do grafico, perto do dinheiro. A mediana de
+    # TODAS as series do vencimento deu 27,6%, puxada pelas asas do
+    # sorriso: strike muito fora do dinheiro tem volatilidade mais alta, e
+    # usar isso como reserva para um strike no dinheiro inflaria o gamma.
+    observadas = sorted(
+        v
+        for s in recorte
+        for v in (por_strike[s].get("iv_call"), por_strike[s].get("iv_put"))
+        if v
+    )
+    if len(observadas) >= 4:
+        vol = observadas[len(observadas) // 2]
+        fonte_vol = f"mediana de {len(observadas)} séries negociadas no vencimento"
+    else:
+        vol, fonte_vol = _volatilidade()
 
     dados = comum.cabecalho("B3, Boletim Diário (posições em aberto e cadastro)")
     dados["ativo"] = alvo["nome"]
@@ -209,9 +256,18 @@ def coletar(dia: date | None = None) -> dict:
             "strike": round(s, 2),
             "call_oi": por_strike[s]["call_oi"],
             "put_oi": por_strike[s]["put_oi"],
+            # Volatilidade implícita de cada lado, do prêmio de fechamento.
+            # Nula quando a série não negociou: aí a página usa a geral.
+            "iv_call": por_strike[s].get("iv_call"),
+            "iv_put": por_strike[s].get("iv_put"),
         }
         for s in recorte
     ]
+    com_iv = sum(
+        1 for s in recorte for k in ("iv_call", "iv_put") if por_strike[s].get(k)
+    )
+    dados["strikes_com_iv"] = com_iv
+    dados["strikes_no_grafico"] = len(recorte)
     dados["series_no_vencimento"] = len(do_vencimento)
     dados["series_sem_cadastro"] = sem_cadastro
     dados["posicoes_sem_cadastro"] = posicoes_sem_cadastro

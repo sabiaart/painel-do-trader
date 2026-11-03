@@ -58,6 +58,90 @@ def percentil(valor: float, historico: list[float]) -> int:
     return round(abaixo / len(historico) * 100)
 
 
+def _normal_acumulada(x: float) -> float:
+    """Probabilidade de a normal padrao ficar abaixo de x."""
+    return 0.5 * (1 + math.erf(x / math.sqrt(2)))
+
+
+def preco_black_scholes(
+    tipo: str, preco: float, strike: float, prazo: float, juros: float, vol: float
+) -> float:
+    """Preco teorico de uma opcao europeia.
+
+    As opcoes de BOVA11 sao europeias (o cadastro da B3 diz "EURO"), entao
+    Black-Scholes serve. Para opcao americana isto seria so uma aproximacao.
+
+    Nao considera dividendos. O BOVA11 distribui pouco, mas isso empurra a
+    volatilidade das calls um pouco para baixo e a das puts para cima.
+    """
+    if prazo <= 0 or vol <= 0 or preco <= 0 or strike <= 0:
+        raise ValueError("preço, strike, prazo e volatilidade precisam ser positivos")
+
+    vt = vol * math.sqrt(prazo)
+    d1 = (math.log(preco / strike) + (juros + vol * vol / 2) * prazo) / vt
+    d2 = d1 - vt
+    desconto = strike * math.exp(-juros * prazo)
+
+    if tipo == "call":
+        return preco * _normal_acumulada(d1) - desconto * _normal_acumulada(d2)
+    return desconto * _normal_acumulada(-d2) - preco * _normal_acumulada(-d1)
+
+
+def volatilidade_implicita(
+    tipo: str,
+    premio: float,
+    preco: float,
+    strike: float,
+    prazo: float,
+    juros: float,
+) -> float | None:
+    """Que volatilidade faz Black-Scholes dar o premio observado.
+
+    Nao ha formula: procura-se o valor por tentativa. Usamos bisseccao, que
+    e mais lenta que Newton-Raphson mas nao diverge - e divergir aqui
+    produziria um numero absurdo com cara de resposta.
+
+    Devolve None quando nao existe resposta sensata, que acontece bastante:
+    serie sem negocio no dia fica com premio velho, e premio abaixo do
+    valor intrinseco nao vem de volatilidade nenhuma.
+    """
+    if premio <= 0 or prazo <= 0 or preco <= 0 or strike <= 0:
+        return None
+
+    # Abaixo do valor intrinseco nao ha volatilidade que explique: seria
+    # arbitragem. Normalmente e premio desatualizado.
+    desconto = strike * math.exp(-juros * prazo)
+    intrinseco = max(preco - desconto, 0) if tipo == "call" else max(desconto - preco, 0)
+    if premio < intrinseco - 1e-9:
+        return None
+
+    baixo, alto = 1e-4, 5.0
+    try:
+        if preco_black_scholes(tipo, preco, strike, prazo, juros, alto) < premio:
+            return None  # nem 500% de volatilidade explica o premio
+    except ValueError:
+        return None
+
+    for _ in range(80):
+        meio = (baixo + alto) / 2
+        try:
+            teorico = preco_black_scholes(tipo, preco, strike, prazo, juros, meio)
+        except ValueError:
+            return None
+        if teorico > premio:
+            alto = meio
+        else:
+            baixo = meio
+        if alto - baixo < 1e-6:
+            break
+
+    vol = (baixo + alto) / 2
+    # Encostou no teto ou no chao da busca: nao e resposta, e desistencia.
+    if vol <= 1e-3 or vol >= 4.99:
+        return None
+    return vol
+
+
 def media_movel(valores: list[float], janela: int) -> list[float | None]:
     """Media dos ultimos `janela` valores, em cada ponto da serie.
 

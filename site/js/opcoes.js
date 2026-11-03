@@ -18,37 +18,49 @@ async function montar() {
   if (!d) return semDado($("bloco-gex"), "os dados de opções");
   marcarOrigem(d);
 
-  const S = d.preco, T = d.prazo_anos, iv = d.vol_implicita, r = d.juros;
+  const S = d.preco, T = d.prazo_anos, r = d.juros;
   const linhas = d.strikes;
+  /* Volatilidade de cada lado de cada strike, vinda do prêmio daquela
+     série. Quando a série não negociou no dia, cai para a geral. */
+  const ivDe = (l, lado) => l[lado === "call" ? "iv_call" : "iv_put"] || d.vol_implicita;
 
   $("gx-titulo").textContent = `Opções de ${d.ativo} · vencimento mensal`;
   $("gx-sub").textContent = `vence ${d.vencimento} · ${d.referencia}`;
 
-  /* gamma de Black-Scholes */
-  const gamma = (preco, K) => {
+  /* gamma de Black-Scholes, com a volatilidade daquela série */
+  const gamma = (preco, K, iv) => {
     const vt = iv * Math.sqrt(T);
     const d1 = (Math.log(preco / K) + (r + (iv * iv) / 2) * T) / vt;
     return npdf(d1) / (preco * vt);
   };
 
-  /* GEX(strike) = (OI_call - OI_put) x gamma x S^2 x 0,01 */
-  const gexEm = (preco, K, call, put) => (call - put) * gamma(preco, K) * preco * preco * 0.01;
-  const gexTotal = (preco) => linhas.reduce((a, l) => a + gexEm(preco, l.strike, l.call_oi, l.put_oi), 0);
+  /* GEX(strike): call e put entram com a volatilidade de cada um. São
+     diferentes — put costuma ser mais cara que call no mesmo strike, e é
+     isso que o sorriso de volatilidade descreve. */
+  const gexEm = (preco, l) =>
+    (l.call_oi * gamma(preco, l.strike, ivDe(l, "call")) -
+      l.put_oi * gamma(preco, l.strike, ivDe(l, "put"))) *
+    preco * preco * 0.01;
+  const gexTotal = (preco) => linhas.reduce((a, l) => a + gexEm(preco, l), 0);
 
   /* call wall e put wall: maior OI x gamma */
-  const maiorPor = (campo) =>
-    linhas.reduce((melhor, l) =>
-      l[campo] * gamma(S, l.strike) > melhor[campo] * gamma(S, melhor.strike) ? l : melhor
-    ).strike;
-  const cw = maiorPor("call_oi");
-  const pw = maiorPor("put_oi");
+  const peso = (l, lado) =>
+    l[lado === "call" ? "call_oi" : "put_oi"] * gamma(S, l.strike, ivDe(l, lado));
+  const maiorPor = (lado) =>
+    linhas.reduce((melhor, l) => (peso(l, lado) > peso(melhor, lado) ? l : melhor)).strike;
+  const cw = maiorPor("call");
+  const pw = maiorPor("put");
 
   /* gamma flip: onde o GEX total troca de sinal, mais perto do preco atual */
   let flip = null;
   {
+    /* A faixa segue o preço do ativo. Antes era 110 a 140, fixo, herdado
+       do exemplo: com BOVA11 a 165 a varredura passava longe e o gamma
+       flip aparecia sempre como "—". */
+    const inicio = S * 0.85, fim = S * 1.15, passo = S / 3000;
     let menorDistancia = Infinity;
-    let anterior = gexTotal(110);
-    for (let s = 110.05; s <= 140; s += 0.05) {
+    let anterior = gexTotal(inicio);
+    for (let s = inicio + passo; s <= fim; s += passo) {
       const v = gexTotal(s);
       if (anterior < 0 !== v < 0 && Math.abs(s - S) < menorDistancia) {
         menorDistancia = Math.abs(s - S);
@@ -82,10 +94,14 @@ async function montar() {
   const conversao = d.razao_ibov
     ? `Níveis convertidos para pontos do Ibovespa pela relação do dia (${d.ativo} × ${fmt(d.razao_ibov)}). `
     : `Níveis em reais de ${d.ativo}: não temos o nível do Ibovespa de fonte livre para converter em pontos. `;
-  const sobreVol = d.vol_fonte
-    ? `<br>Gamma calculado com <b>uma volatilidade só para todos os strikes</b> (${d.vol_fonte}), ` +
-      `e não com a implícita de cada série. Isso achata o sorriso de volatilidade e subestima o gamma das pontas. `
-    : "";
+  const semIv = linhas.length * 2 - (d.strikes_com_iv || 0);
+  const sobreVol =
+    `<br>Gamma calculado com a <b>volatilidade implícita de cada série</b>, tirada do prêmio ` +
+    `de fechamento dela. ` +
+    (semIv > 0
+      ? `${fmt(semIv)} ${semIv === 1 ? "lado não negociou" : "lados não negociaram"} no dia e ` +
+        `${semIv === 1 ? "usa" : "usam"} ${fmt(d.vol_implicita * 100, 1)}% (${d.vol_fonte}) no lugar. `
+      : "");
   /* Quando parte das séries não tem strike no cadastro da B3, o gráfico
      mostra menos posição do que existe. Dizer quanto é o mínimo. */
   const buraco =
