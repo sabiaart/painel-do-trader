@@ -13,6 +13,7 @@ import sys
 import time
 from datetime import date
 
+import b3
 import calculos
 import comum
 import fontes
@@ -234,6 +235,46 @@ def atualizar_globais() -> str:
     return f"{favoraveis} de {len(coletados)} a favor, pregão de {pregao}{aviso}"
 
 
+def atualizar_fluxo() -> str:
+    """Bloco "Fluxo estrangeiro", direto do Boletim Diario da B3.
+
+    Leia o aviso no topo de b3.py antes de mexer: esta coleta e automatizada
+    e os termos da B3 a proibem. Foi uma decisao do dono do projeto, para
+    uso pessoal e sem republicacao.
+    """
+    serie = b3.fluxo_estrangeiro_diario()
+    ultimos = serie[-20:]
+    valores = [round(v, 3) for _, v in ultimos]
+    fim = ultimos[-1][0]
+
+    # "Mes" e o mes do ultimo pregao que temos (outubro, mesmo em novembro),
+    # porque o dado chega com dois dias de atraso e na virada ainda nao ha
+    # nada do mes corrente. O rotulo na tela diz qual mes e.
+    do_mes = sum(v for d, v in serie if (d.year, d.month) == (fim.year, fim.month))
+
+    dados = comum.cabecalho("B3, Boletim Diário (participação dos investidores)")
+    dados["unidade"] = "R$ bi"
+    dados["pregoes"] = valores
+    dados["ontem"] = valores[-1]
+    dados["mes"] = round(do_mes, 2)
+    dados["mes_nome"] = MESES[fim.month - 1]
+    # So temos a janela que a B3 publica (cerca de 21 pregoes). Somar "ano"
+    # com isso daria um numero que parece do ano e nao e.
+    dados["ano"] = None
+    dados["pregao"] = fim.isoformat()
+    dados["pregoes_no_historico"] = len(serie)
+    dados["parcial"] = False
+    comum.gravar("fluxo", dados)
+
+    return f"{len(ultimos)} pregões até {fim:%d/%m}, último {valores[-1]:+.2f} R$ bi"
+
+
+MESES = [
+    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+]
+
+
 def atualizar_fontes(estado: dict[str, dict]) -> None:
     """Grava o estado de cada fonte, para a pagina /sobre mostrar."""
     dados = comum.cabecalho("pipeline", exemplo=False)
@@ -282,8 +323,17 @@ def main() -> int:
     # O robo NUNCA acessa b3.com.br: a B3 proibe coleta automatizada. Ele le
     # o que estiver em b3-manual/. Pasta vazia nao e falha: e so nao ter
     # arquivo novo hoje, e o dado de ontem continua valendo.
+    print("\n[fluxo] fluxo estrangeiro (Boletim Diário da B3)")
+    try:
+        resumo = atualizar_fluxo()
+        houve_sucesso = True
+        print(f"  ok {resumo}")
+        estado["fluxo"] = {"situacao": "ok", "detalhe": resumo, "em": comum.agora()}
+    except comum.FonteIndisponivel as erro:
+        comum.manter_anterior("fluxo", str(erro))
+        estado["fluxo"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
+
     for nome, rotulo, funcao in (
-        ("fluxo", "fluxo estrangeiro", manuais.atualizar_fluxo),
         ("participantes", "posições por participante", manuais.atualizar_participantes),
     ):
         print(f"\n[{nome}] {rotulo} (arquivo da B3 baixado a mão)")

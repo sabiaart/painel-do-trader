@@ -374,3 +374,44 @@ Consequencias:
       ainda separa por tipo de participante.
 - [ ] Se nao separar: decidir entre trocar o 4.8 por contratos em aberto
       totais do WIN (dado real, bloco mais fraco), remover o bloco, ou pagar.
+
+### Acrescentado em 02/11/2026: coleta automatica da B3, e o que ela achou
+
+**Decisao do dono, com o texto dos termos a vista.** Eu li a pagina do
+Boletim Diario e ela proibe coleta automatizada em qualquer finalidade,
+comercial ou nao, citando ferramentas de IA. Mostrei a frase. A decisao foi
+seguir mesmo assim, como painel pessoal, sem republicacao. A regra antiga do
+CLAUDE.md ("nunca raspar a B3") foi retirada a pedido dele.
+
+A coleta esta em `pipeline/b3.py`, que abre com esse aviso escrito.
+
+**A API do Boletim** (descoberta observando o proprio site):
+
+    GET  /bdi/table/classifications              lista capitulos e tabelas
+    GET  /bdi/table/workdays?date=AAAA-MM-DD     pregoes
+    POST /bdi/table/{tabela}/{de}/{ate}/{pag}/{n}   dados
+
+Tabelas que importam: `SharesInvesVolum` (participacao dos investidores) e
+`AnalyticalFramework2` (quadro analitico das posicoes em aberto).
+
+**Tres armadilhas encontradas, todas tratadas:**
+
+1. **A data do arquivo nao e a data do dado.** O arquivo de 30/10 diz, no
+   proprio texto, "acumulados ate o dia 28/10". O de 02/10 traz 30/09 - ou
+   seja, ainda o mes anterior. O codigo le essa data do texto.
+2. **Os valores sao acumulados no mes, nao diarios.** O fluxo de um dia e a
+   diferenca para o pregao anterior, e isso so vale dentro do mesmo mes.
+   Conferencia: a soma dos diarios de outubro deu 8,59 bi, contra 8,585 bi
+   do acumulado que a B3 publica direto.
+3. **Os nomes internos das colunas estao desalinhados com o conteudo.** Na
+   participacao dos investidores, a coluna chamada "Sales" e a de
+   porcentagem e as vendas estao em "Partmil". O codigo casa pelo rotulo
+   visivel, nao pelo nome interno.
+
+**Bloco 4.8 confirmado sem fonte.** O quadro analitico traz contratos em
+aberto POR CONTRATO (WIN: 1.281.259 em 30/10), nao por tipo de participante.
+A divisao por participante nao esta no publico. Opcoes: trocar o bloco por
+contratos em aberto de WIN e WDO (dado real, pergunta diferente), remover,
+ou pagar.
+
+- [ ] Decidir o que fazer com o 4.8.

@@ -28,3 +28,6 @@ b3-manual/*
 # publico o que a B3 licencia para consulta.
 site/data/fluxo.json
 site/data/participantes.json
+
+# Respostas da B3 guardadas para nao pedir duas vezes a mesma coisa.
+cache-b3/

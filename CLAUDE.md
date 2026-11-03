@@ -8,7 +8,9 @@ Site gratuito de contexto do mercado brasileiro para traders de WIN e WDO, monet
 
 ## Regras do projeto
 
-- **Nunca raspar o site da B3.** Use só arquivos públicos de download (depois de confirmar os termos) ou APIs licenciadas.
+- **Painel pessoal, não site público.** Os dados ficam no computador e não são republicados. Decidido em 02/11/2026; a ideia de site com anúncios está parada.
+- **A coleta da B3 é automatizada, contra os termos dela.** O dono leu o aviso ("é expressamente vedada a coleta automatizada, inclusive por meio de ferramentas de inteligência artificial, para quaisquer finalidades, comerciais ou não") e decidiu seguir assim, para uso pessoal. Não é para esconder isso: `pipeline/b3.py` abre com esse aviso escrito. Se um dia o painel for publicado, essa coleta sai antes.
+- **Baixar uma vez por dia e guardar.** Nada de repetir pedido que já está em `cache-b3/`.
 - **Nada de recomendação de investimento** em textos, gerados por IA ou não. Só estatística e contexto.
 - Dados de exemplo sempre identificados como exemplo na tela.
 - Se uma fonte falhar, mantenha o último dado válido com a data dele. A página nunca quebra.

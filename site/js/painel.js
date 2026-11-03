@@ -238,12 +238,19 @@ async function fluxo() {
      baixados. Dizer "Ano −12,7" sem essa ressalva seria mentira. */
   const n = d.pregoes_no_historico || d.pregoes.length;
   $("fluxo-escala").textContent = `${d.unidade} · ${plural(d.pregoes.length, "pregão", "pregões")}`;
-  const parcial = d.parcial
-    ? `<span class="muted">Mês e ano somam só ${plural(n, "pregão", "pregões")} já baixado${n === 1 ? "" : "s"}.</span>`
-    : "";
+  const notas = [];
+  if (d.parcial)
+    notas.push(`Mês e ano somam só ${plural(n, "pregão", "pregões")} já baixado${n === 1 ? "" : "s"}.`);
+  if (d.ano == null)
+    notas.push("A B3 publica cerca de 21 pregões, então não há total do ano.");
+  if (d.pregao) notas.push(`Último pregão publicado: ${d.pregao.split("-").reverse().join("/")}.`);
+  const parcial = notas.length ? `<span class="muted">${notas.join(" ")}</span>` : "";
+  /* O dado chega com dois dias de atraso, então em 2/11 o "mês" ainda é
+     outubro. Dizer só "Mês" ali seria dizer novembro sem querer. */
+  const mes = d.mes_nome ? `Mês (${d.mes_nome.slice(0, 3)})` : "Mês";
   $("fluxo-stats").innerHTML =
-    `<span class="muted">Ontem ${sinal(d.ontem, 2)}</span>` +
-    `<span class="muted">Mês ${sinal(d.mes, 1)}</span>` +
+    `<span class="muted">Último pregão ${sinal(d.ontem, 2)}</span>` +
+    `<span class="muted">${mes} ${sinal(d.mes, 1)}</span>` +
     `<span class="muted">Ano ${sinal(d.ano, 1)}</span>` +
     parcial;
 }

@@ -30,7 +30,7 @@ def agora() -> str:
     return datetime.now(FUSO_BR).isoformat(timespec="seconds")
 
 
-def baixar(url: str, *, tentativas: int = 3, espera: float = 3.0) -> bytes:
+def baixar(url: str, *, tentativas: int = 3, espera: float = 3.0, metodo: str = "GET") -> bytes:
     """Baixa uma URL. Tenta de novo algumas vezes antes de desistir.
 
     Falhas de rede sao comuns e passageiras; desistir na primeira seria
@@ -39,7 +39,9 @@ def baixar(url: str, *, tentativas: int = 3, espera: float = 3.0) -> bytes:
     ultimo_erro: Exception | None = None
     for tentativa in range(1, tentativas + 1):
         try:
-            pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE})
+            pedido = urllib.request.Request(
+                url, headers={"User-Agent": AGENTE}, method=metodo
+            )
             with urllib.request.urlopen(pedido, timeout=30) as resposta:
                 if resposta.status != 200:
                     raise FonteIndisponivel(f"HTTP {resposta.status}")
