@@ -31,3 +31,6 @@ site/data/contratos.json
 
 # Respostas da B3 guardadas para nao pedir duas vezes a mesma coisa.
 cache-b3/
+
+# Memoria dos indicadores. Dado derivado da B3: fica so no computador.
+historico/

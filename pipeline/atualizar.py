@@ -17,6 +17,7 @@ import b3
 import calculos
 import comum
 import fontes
+import historico
 import indicadores
 import termometro as calc_termometro
 
@@ -254,6 +255,9 @@ def atualizar_fluxo() -> str:
     dados = comum.cabecalho("B3, Boletim Diário (participação dos investidores)")
     dados["unidade"] = "R$ bi"
     dados["pregoes"] = valores
+    # As datas de cada barra. A tela nao usa, mas o historico usa: sem
+    # elas, os 19 pregoes entrariam na memoria sem saber de que dia sao.
+    dados["datas"] = [d.isoformat() for d, _ in ultimos]
     dados["ontem"] = valores[-1]
     dados["mes"] = round(do_mes, 2)
     dados["mes_nome"] = MESES[fim.month - 1]
@@ -426,6 +430,16 @@ def main() -> int:
         estado["contratos"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
     atualizar_fontes(estado)
+
+    # Guarda o dia no historico, para um dia dar para analisar a serie.
+    # So anota o que e dado real: exemplo e dado velho ficam de fora, se
+    # nao a serie ficaria com degraus que nao aconteceram no mercado.
+    print("\n[historico] memória dos indicadores")
+    try:
+        print(f"  ok {historico.registrar()}")
+    except OSError as erro:
+        # Falhar aqui nao pode derrubar o painel: o historico e um extra.
+        print(f"  ! não consegui gravar o histórico: {erro}")
 
     if not houve_sucesso:
         print("\nNenhuma fonte respondeu. Os arquivos anteriores foram mantidos.")

@@ -479,3 +479,56 @@ media apos um pico - mas e bom saber antes de ler a nota como verdade.
 
 - [ ] Guardar o historico diario da nota por tempo suficiente para o
       "ontem / semana / mes" ficar util.
+
+### Acrescentado em 02/11/2026: memoria dos indicadores
+
+`pipeline/historico.py` grava `historico/indicadores.csv` ao fim de cada
+execucao. Formato longo:
+
+    data;referencia;indicador;valor;unidade;fonte
+
+`data` e o dia em que o painel rodou; `referencia` e o pregao a que o numero
+se refere. Os dois diferem: o fluxo chega com dois dias uteis de atraso.
+Para analisar serie, usar `referencia`.
+
+Formato longo (uma linha por indicador) e nao largo (uma coluna por
+indicador) de proposito: quando um indicador nasce ou morre - e ja morreu um
+neste projeto - o arquivo continua valido e o passado continua significando
+a mesma coisa. Em formato largo, cada mudanca exigiria reescrever o historico.
+
+- So entra dado REAL. Exemplo e dado desatualizado ficam de fora, para a
+  serie nao ter degraus que nao aconteceram no mercado.
+- Rodar duas vezes no mesmo dia substitui as linhas do dia, nao duplica.
+- O fluxo entra com os ~19 pregoes que a B3 publica de uma vez, nao so o
+  ultimo: esperar um mes pelo que ja esta na mao seria bobagem.
+- 4 KB no primeiro dia; cerca de 2 KB por dia dai em diante.
+- Fica fora do Git (dado derivado da B3).
+
+### Acrescentado em 02/11/2026: opcoes.net nao serve, mas a B3 serve
+
+**opcoes.net.br esta descartado.** Nao tem API (a tabela vem dentro do HTML,
+entao seria raspagem de pagina) e os termos de uso, secao 5, dizem:
+
+    "O usuario concorda em acessar as informacoes e servicos disponibilizados
+    pelo site unica e exclusivamente por meio de um navegador de internet
+    tradicional, sendo proibido qualquer tipo de acesso automatizado para
+    coleta de informacoes, realizacao de simulacoes ou qualquer outro tipo de
+    interacao com o site."
+
+Alem de mais explicito que o aviso da B3, ha uma diferenca de natureza: a
+SYSMIDIA e uma empresa pequena cujo PRODUTO e justamente esse dado tratado,
+vendido por assinatura. A B3 e a bolsa publicando dado de referencia do
+mercado que ela propria opera.
+
+**A B3 tem o dado, e melhor.** No Boletim Diario, capitulo Derivativos de
+bolsa:
+
+- `OpenPositionsEquities` ("Posicoes em aberto"): uma linha por instrumento,
+  com contratos em aberto e a variacao. Inclui as series de opcoes.
+  Cerca de 43 mil linhas por dia, em 86 paginas de 500 (o pageSize parece
+  limitado a 500; 5000 foi recusado).
+- `InstrumentsDerivatives` ("Cadastro de instrumentos"): onde deve estar o
+  strike de cada serie, que e o que falta para montar GEX e os muros.
+
+- [ ] Conferir se o cadastro de instrumentos traz strike e tipo (call/put).
+- [ ] Ver se da para filtrar por ativo em vez de baixar as 86 paginas.
