@@ -58,6 +58,39 @@ def percentil(valor: float, historico: list[float]) -> int:
     return round(abaixo / len(historico) * 100)
 
 
+def media_movel(valores: list[float], janela: int) -> list[float | None]:
+    """Media dos ultimos `janela` valores, em cada ponto da serie.
+
+    Devolve uma lista do mesmo tamanho da entrada, com None nos primeiros
+    pontos, onde ainda nao ha historico suficiente. Manter o mesmo tamanho
+    evita o erro classico de desalinhar a media do preco por alguns dias.
+    """
+    if janela < 1:
+        raise ValueError("janela precisa ser pelo menos 1")
+    saida: list[float | None] = []
+    soma = 0.0
+    for posicao, valor in enumerate(valores):
+        soma += valor
+        if posicao >= janela:
+            soma -= valores[posicao - janela]
+        saida.append(soma / janela if posicao >= janela - 1 else None)
+    return saida
+
+
+def distancia_da_media(valores: list[float], janela: int) -> list[float]:
+    """Quanto cada ponto esta acima ou abaixo da sua media movel, em fracao.
+
+    E isto que o termometro compara: nao o preco, que nao diz nada sozinho,
+    mas o quanto ele esta esticado em relacao a propria media.
+    """
+    medias = media_movel(valores, janela)
+    return [
+        valor / media - 1
+        for valor, media in zip(valores, medias)
+        if media not in (None, 0)
+    ]
+
+
 def faixa_respeitada(serie: list[dict], janela: int = 30, vol_janela: int = 21) -> tuple[int, int]:
     """Em quantos dos ultimos pregoes o preco ficou dentro de 1 desvio.
 

@@ -18,6 +18,7 @@ import calculos
 import comum
 import fontes
 import indicadores
+import termometro as calc_termometro
 
 JANELA_VOL = 21  # pregoes usados na volatilidade historica
 PAUSA_ENTRE_CONSULTAS = 1.5  # segundos; a Alpha Vantage aceita 1 por segundo
@@ -392,6 +393,27 @@ def main() -> int:
     except comum.FonteIndisponivel as erro:
         comum.manter_anterior("fluxo", str(erro))
         estado["fluxo"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
+
+    print("\n[termometro] medo e ganância")
+    try:
+        dados, falhas_term = calc_termometro.calcular()
+        houve_sucesso = True
+        comum.gravar("termometro", dados)
+        resumo = (
+            f"nota {dados['nota']} ({dados['zona']}), "
+            f"{dados['usados']} de {dados['previstos']} componentes"
+        )
+        print(f"  ok {resumo}")
+        for falha in falhas_term:
+            print(f"    - {falha[:120]}")
+        estado["termometro"] = {
+            "situacao": "parcial" if falhas_term else "ok",
+            "detalhe": resumo,
+            "em": comum.agora(),
+        }
+    except comum.FonteIndisponivel as erro:
+        comum.manter_anterior("termometro", str(erro))
+        estado["termometro"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
     print("\n[contratos] contratos em aberto (Boletim Diário da B3)")
     try:

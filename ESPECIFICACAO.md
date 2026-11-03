@@ -435,3 +435,47 @@ WIN +31,8%, DOL +58,6%, WDO +13,5%, IND +2,6% em 5 pregoes.
 
 `pipeline/manuais.py` foi removido: sem CSV na B3, o leitor manual ficou sem
 entrada. Esta no historico do Git.
+
+### Acrescentado em 02/11/2026: termometro com 4 dos 7 componentes
+
+`pipeline/termometro.py`. Cada componente vira percentil, a nota e a media
+simples dos que existem.
+
+**Com fonte (4):** momento (EWZ no lugar do Ibovespa), volatilidade
+(VXEWZ/FRED), porto seguro (dolar PTAX/BCB) e fluxo estrangeiro (B3).
+
+**Sem fonte (3), e ficam visiveis na tela com o motivo:**
+
+- Amplitude das acoes: precisaria do historico das ~85 acoes do Ibovespa, e
+  a cota gratuita da Alpha Vantage e de 25 consultas por DIA.
+- Posicao do estrangeiro no WIN: a B3 nao publica por tipo de participante.
+- Protecao (put/call de BOVA11): sem fonte gratuita.
+
+Eles NAO entram na media: quatro notas reais valem mais que quatro reais e
+tres inventadas. A tela mostra "nota feita com X dos 7", separando o que
+nao tem fonte do que apenas falhou hoje.
+
+**Duas concessoes forcadas pela fonte:**
+
+1. `outputsize=full` da Alpha Vantage virou recurso pago. Sobram 100
+   pregoes, entao o momento usa media de 50 (a especificacao pedia 125) e
+   percentil sobre ~50 pontos. Marcado com * na tela.
+2. O fluxo so tem ~21 pregoes publicados, logo o percentil dele sai sobre
+   15 janelas, nao sobre um ano. Tambem marcado.
+
+**Ontem / semana / mes:** nao da para recalcular o termometro do passado -
+as fontes de hoje nao dizem como o fluxo estava ha um mes. Entao o arquivo
+guarda a nota de cada dia e a comparacao comeca a existir amanha. Ate la,
+travessao.
+
+**Primeira leitura, 02/11:** nota 34 (Medo), com volatilidade 100, dolar 1 e
+fluxo 0. O momento, testado a parte com dados reais do EWZ, daria 0.
+
+Vale entender por que a volatilidade sozinha diz "calmaria" enquanto tudo o
+mais grita panico: ela compara a VXEWZ com a media de 50 dias, e a media
+esta inflada pelo proprio susto de 26/10. A VXEWZ caiu de 67,69 (22/10) para
+36,38 (30/10). Nao e defeito do calculo, e uma propriedade de comparar com
+media apos um pico - mas e bom saber antes de ler a nota como verdade.
+
+- [ ] Guardar o historico diario da nota por tempo suficiente para o
+      "ontem / semana / mes" ficar util.

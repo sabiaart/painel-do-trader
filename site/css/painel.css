@@ -218,3 +218,10 @@ footer a{color:var(--muted)}
 .tag-exemplo{font-size:11px;padding:3px 9px;border-radius:999px;border:1px dashed var(--line);
   color:var(--muted);white-space:nowrap;margin-left:auto}
 .exemplo-bloco{display:inline-flex;align-items:center;gap:6px}
+
+/* Componente do termometro sem fonte: aparece na lista, apagado, com o
+   motivo no title. Sumir seria esconder que a nota usa menos componentes. */
+.comps li.sem-fonte { opacity: .55; }
+.comps li.sem-fonte .cbar { background: transparent; border: 1px dashed var(--line); }
+.comps li.nota-rodape { display: block; margin-top: 8px; font-size: 12px; line-height: 1.5; }
+.comps li.nota-rodape .cbar { display: none; }

@@ -142,6 +142,47 @@ def alpha_cotacao(simbolo: str, chave: str) -> dict:
     }
 
 
+def alpha_serie(simbolo: str, chave: str, *, minimo: int = 90) -> list[tuple[date, float]]:
+    """Fechamentos diarios de um papel, do mais antigo para o mais novo.
+
+    Sao 100 pregoes, e nao mais: `outputsize=full` virou recurso pago na
+    Alpha Vantage. Quem chama precisa dimensionar media movel e percentil
+    para caber nisso - o termometro usa media de 50 em vez dos 125 que a
+    especificacao pedia, e diz isso na tela.
+    """
+    from urllib.parse import urlencode
+
+    url = f"{ALPHA}?" + urlencode(
+        {
+            "function": "TIME_SERIES_DAILY",
+            "symbol": simbolo,
+            "outputsize": "compact",
+            "apikey": chave,
+        }
+    )
+    try:
+        bruto = json.loads(baixar(url).decode("utf-8"))
+    except json.JSONDecodeError as erro:
+        raise FonteIndisponivel(f"{simbolo}: série não é JSON ({erro})") from erro
+
+    for campo in ("Note", "Information", "Error Message"):
+        if campo in bruto:
+            raise FonteIndisponivel(f"{simbolo}: {str(bruto[campo])[:160]}")
+
+    serie_bruta = bruto.get("Time Series (Daily)") or {}
+    serie: list[tuple[date, float]] = []
+    for dia, valores in serie_bruta.items():
+        try:
+            serie.append((date.fromisoformat(dia), float(valores["4. close"])))
+        except (KeyError, ValueError):
+            continue
+
+    if len(serie) < minimo:
+        raise FonteIndisponivel(f"{simbolo}: só {len(serie)} pregões, preciso de {minimo}")
+    serie.sort()
+    return serie
+
+
 BRAPI = "https://brapi.dev/api/v2/futures"
 LETRAS_MES = "FGHJKMNQUVXZ"  # codigo de vencimento da B3: F=jan ... Z=dez
 

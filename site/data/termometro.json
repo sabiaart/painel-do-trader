@@ -1,10 +1,68 @@
-{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
-"nota":60,"ontem":54,"semana":41,"mes":33,
-"componentes":[
-{"nome":"Momento do Ibovespa","nota":71},
-{"nome":"Amplitude das ações","nota":58},
-{"nome":"Volatilidade (VIX Ibov)","nota":64},
-{"nome":"Fluxo estrangeiro 5d","nota":69},
-{"nome":"Posição estrangeiro no WIN","nota":40},
-{"nome":"Proteção (put/call)","nota":55},
-{"nome":"Porto seguro (dólar)","nota":66}]}
+{
+ "gerado_em": "2026-11-02T22:09:02-03:00",
+ "origem": "Alpha Vantage, FRED/Cboe, Banco Central e B3",
+ "exemplo": false,
+ "desatualizado": false,
+ "nota": 34,
+ "zona": "Medo",
+ "componentes": [
+  {
+   "nome": "Momento (EWZ)",
+   "nota": null,
+   "motivo": "EWZ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:"
+  },
+  {
+   "nome": "Volatilidade (VXEWZ)",
+   "nota": 100,
+   "fonte": "FRED / Cboe (VXEWZCLS)",
+   "detalhe": "contra a média de 50 pregões; volatilidade alta é medo",
+   "janela": 252,
+   "substitui": "VIX do Ibovespa",
+   "citacao": "Chicago Board Options Exchange, CBOE Brazil ETF Volatility Index [VXEWZCLS], retrieved from FRED, Federal Reserve Bank of St. Louis."
+  },
+  {
+   "nome": "Porto seguro (dólar)",
+   "nota": 1,
+   "fonte": "Banco Central (SGS 1, dólar PTAX de venda)",
+   "detalhe": "contra a média de 125 pregões; dólar subindo é medo",
+   "janela": 150
+  },
+  {
+   "nome": "Fluxo estrangeiro 5d",
+   "nota": 0,
+   "fonte": "B3, Boletim Diário (participação dos investidores)",
+   "detalhe": "soma de 5 pregões, comparada com as outras janelas do período",
+   "janela": 15,
+   "curto": true
+  },
+  {
+   "nome": "Amplitude das ações",
+   "nota": null,
+   "motivo": "exigiria o histórico das ~85 ações do Ibovespa; a cota gratuita é de 25 consultas por dia",
+   "permanente": true
+  },
+  {
+   "nome": "Posição estrangeiro no WIN",
+   "nota": null,
+   "motivo": "a B3 não publica posições por tipo de participante",
+   "permanente": true
+  },
+  {
+   "nome": "Proteção (put/call)",
+   "nota": null,
+   "motivo": "sem fonte gratuita para as opções de BOVA11",
+   "permanente": true
+  }
+ ],
+ "usados": 3,
+ "previstos": 7,
+ "historico": {
+  "2026-11-02": 34
+ },
+ "ontem": null,
+ "semana": null,
+ "mes": null,
+ "falhas": [
+  "Momento (EWZ): EWZ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:"
+ ]
+}

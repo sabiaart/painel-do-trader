@@ -75,12 +75,33 @@ async function termometro() {
   if (!d) return semDado($("bloco-termometro"), "o termômetro");
   registrar("termômetro", d, "bloco-termometro");
 
+  /* Componente sem fonte aparece na lista, com o motivo, em vez de sumir.
+     Sumir esconderia que a nota sai de menos componentes do que a
+     especificação pede. Ele não entra na média. */
   $("comps").innerHTML = d.componentes
-    .map(
-      (c) =>
-        `<li><span>${c.nome}</span><span class="cbar"><i style="width:${c.nota}%;background:${corZona(c.nota)}"></i></span><span class="v">${c.nota}</span></li>`
-    )
+    .map((c) => {
+      if (c.nota == null)
+        return `<li class="sem-fonte"><span>${c.nome}</span><span class="cbar"></span><span class="v muted" title="${c.motivo}">—</span></li>`;
+      const curto = c.curto ? ` title="janela curta: ${c.janela} pregões"` : "";
+      return `<li${curto}><span>${c.nome}${c.curto ? " *" : ""}</span><span class="cbar"><i style="width:${c.nota}%;background:${corZona(c.nota)}"></i></span><span class="v">${c.nota}</span></li>`;
+    })
     .join("");
+
+  if (d.usados != null && d.usados < d.previstos) {
+    /* "Sem fonte" e "falhou hoje" são coisas diferentes: a primeira não tem
+       conserto, a segunda volta sozinha amanhã. */
+    const semFonte = d.componentes.filter((c) => c.nota == null && c.permanente);
+    const falhou = d.componentes.filter((c) => c.nota == null && !c.permanente);
+    const curtos = d.componentes.filter((c) => c.curto);
+    const partes = [`Nota feita com ${d.usados} dos ${d.previstos} componentes.`];
+    if (semFonte.length) partes.push(`Sem fonte: ${semFonte.map((c) => c.nome).join(", ")}.`);
+    if (falhou.length) partes.push(`Falhou hoje: ${falhou.map((c) => c.nome).join(", ")}.`);
+    if (curtos.length) partes.push("Os marcados com * usam janela curta.");
+    $("comps").insertAdjacentHTML(
+      "beforeend",
+      `<li class="nota-rodape"><span class="muted">${partes.join(" ")}</span></li>`
+    );
+  }
 
   const v = d.nota;
   const cx = 110, cy = 112, r = 92, sw = 16;
@@ -113,7 +134,14 @@ async function termometro() {
   const z = $("gzone");
   z.textContent = nomeZona(v);
   z.style.color = corZona(v);
-  $("gprev").textContent = `Ontem ${d.ontem} · há 1 semana ${d.semana} · há 1 mês ${d.mes}`;
+  /* Comparar com ontem exige ter guardado a nota de ontem. Enquanto o
+     histórico não existir, a linha some - em vez de mostrar números
+     plausíveis que ninguém calculou. */
+  const n = (x) => (x == null ? null : x);
+  $("gprev").textContent =
+    [n(d.ontem), n(d.semana), n(d.mes)].every((x) => x == null)
+      ? "Sem histórico ainda: a comparação começa amanhã."
+      : `Ontem ${d.ontem ?? "—"} · há 1 semana ${d.semana ?? "—"} · há 1 mês ${d.mes ?? "—"}`;
 }
 
 /* ---------------- 4.5 Tom das noticias ---------------- */
