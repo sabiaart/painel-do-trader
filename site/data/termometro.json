@@ -1,19 +1,15 @@
 {
- "gerado_em": "2026-11-03T12:39:17-03:00",
+ "gerado_em": "2026-11-03T14:18:55-03:00",
  "origem": "Alpha Vantage, FRED/Cboe, Banco Central e B3",
  "exemplo": false,
  "desatualizado": false,
- "nota": 26,
+ "nota": 35,
  "zona": "Medo",
  "componentes": [
   {
    "nome": "Momento (EWZ)",
-   "nota": 0,
-   "fonte": "Alpha Vantage (EWZ, no lugar do Ibovespa)",
-   "detalhe": "preço contra a média de 50 pregões",
-   "janela": 51,
-   "substitui": "Ibovespa",
-   "curto": true
+   "nota": null,
+   "motivo": "falta a chave ALPHA_VANTAGE"
   },
   {
    "nome": "Volatilidade (VXEWZ)",
@@ -29,7 +25,7 @@
    "nota": 1,
    "fonte": "Banco Central (SGS 1, dólar PTAX de venda)",
    "detalhe": "contra a média de 125 pregões; dólar subindo é medo",
-   "janela": 150
+   "janela": 151
   },
   {
    "nome": "Fluxo estrangeiro 5d",
@@ -58,14 +54,16 @@
    "permanente": true
   }
  ],
- "usados": 4,
+ "usados": 3,
  "previstos": 7,
  "historico": {
   "2026-11-02": 34,
-  "2026-11-03": 26
+  "2026-11-03": 35
  },
  "ontem": 34,
  "semana": null,
  "mes": null,
- "falhas": []
+ "falhas": [
+  "Momento (EWZ): falta a chave ALPHA_VANTAGE"
+ ]
 }
