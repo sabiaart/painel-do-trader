@@ -1,6 +1,14 @@
-{"gerado_em":"2026-11-02T07:00:00-03:00","origem":"exemplo","exemplo":true,
-"linhas":[
-"Futuros de Nova York sobem e o EWZ avança no pré-mercado.",
-"Minério firme em Dalian ajuda Vale; petróleo de lado.",
-"Payroll às 10h30 pode virar o humor do pregão."],
-"fechamento":null}
+{
+ "gerado_em": "2026-11-03T12:39:18-03:00",
+ "origem": "montado dos números do próprio painel",
+ "exemplo": false,
+ "desatualizado": false,
+ "linhas": [
+  "Nova York caiu 0,48% no S&P 500, e o EWZ, que segue o Brasil, caiu 0,92%.",
+  "O dólar recuou 0,14%, o petróleo caiu 7,62% e a China subiu 0,39%.",
+  "O estrangeiro vendeu R$ 0,10 bi no pregão de 29/10 e o termômetro está em 26, zona de medo."
+ ],
+ "pregao": "2026-11-02",
+ "por_ia": false,
+ "fechamento": null
+}

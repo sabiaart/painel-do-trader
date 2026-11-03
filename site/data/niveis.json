@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-11-02T22:04:01-03:00",
+ "gerado_em": "2026-11-03T12:38:58-03:00",
  "origem": "brapi.dev (ajuste e histórico da B3)",
  "exemplo": false,
  "ativos": {
@@ -12,7 +12,7 @@
    "minima": 169070.0,
    "desvio": 6820.0,
    "casas": 0,
-   "dias_vencimento": 44,
+   "dias_vencimento": 43,
    "vencimento": "2026-12-16",
    "exemplo_preco": "170.165",
    "faixa_ampliada": null,
@@ -37,7 +37,7 @@
    "minima": 5386.0,
    "desvio": 114.8,
    "casas": 1,
-   "dias_vencimento": 1,
+   "dias_vencimento": 0,
    "vencimento": "2026-11-03",
    "exemplo_preco": "5.421,2",
    "faixa_ampliada": null,

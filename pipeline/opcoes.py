@@ -122,10 +122,29 @@ def _volatilidade() -> tuple[float, str]:
         return 0.25, "valor fixo: o FRED não respondeu"
 
 
+TENTATIVAS_DE_PREGAO = 4
+
+
 def coletar(dia: date | None = None) -> dict:
-    """Monta o arquivo de opcoes do primeiro ativo de ATIVOS."""
-    pregoes = b3.dias_uteis()
-    dia = dia or pregoes[0]
+    """Monta o arquivo de opcoes do primeiro ativo de ATIVOS.
+
+    Se nao for dito qual pregao, recua ate achar um ja publicado. O
+    boletim do dia so sai depois das 15h, entao rodar o painel de manha
+    sempre cai no dia anterior - e isso nao e falha, e o normal.
+    """
+    if dia is not None:
+        return _coletar_do_pregao(dia)
+
+    falhas = []
+    for candidato in b3.dias_uteis()[:TENTATIVAS_DE_PREGAO]:
+        try:
+            return _coletar_do_pregao(candidato)
+        except comum.FonteIndisponivel as erro:
+            falhas.append(f"{candidato:%d/%m}: {erro}")
+    raise comum.FonteIndisponivel("; ".join(falhas))
+
+
+def _coletar_do_pregao(dia: date) -> dict:
     hoje = date.today()
 
     codigos = {a["codigo"] for a in ATIVOS}

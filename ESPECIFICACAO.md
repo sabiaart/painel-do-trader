@@ -638,3 +638,36 @@ GEX +R$ 49,3 mi.
 - [ ] Black-Scholes nao considera dividendos. O BOVA11 distribui pouco,
       mas isso empurra a volatilidade das calls para baixo e a das puts
       para cima.
+
+### Acrescentado em 03/11/2026: resumo do dia sem IA
+
+A especificacao (4.2) previa mandar os numeros ao Claude e pedir tres
+frases. Isso exige chave de API paga, e a regra do projeto e perguntar
+antes de contratar servico. Entao o resumo passou a ser montado dos
+proprios numeros do painel, em `pipeline/resumo.py`.
+
+Tem uma vantagem que nao e pequena: texto montado de numero nao inventa.
+Um modelo pode escrever "o minerio firme ajuda a Vale" sem que o minerio
+tenha subido; aqui, se esta escrito que caiu, caiu. A desvantagem e ser
+mais seco e nao conectar assuntos como uma pessoa conectaria.
+
+As tres linhas: Nova York e o EWZ; dolar, petroleo e China; fluxo
+estrangeiro e termometro. Movimento abaixo de 0,3% vira "de lado", para
+nao dar adjetivo a ruido.
+
+O campo `por_ia: false` fica no arquivo. Se um dia entrar a versao com
+Claude, a tela sabe qual e qual - e o selo "Leitura por IA" so aparece
+quando for verdade.
+
+- [ ] Decidir se vale pagar API do Claude para a versao escrita.
+
+### Teste do dia 03/11: o que o dia novo revelou
+
+Rodar o pipeline num dia diferente testou o cache e achou um defeito:
+
+- **Opcoes pedia o boletim de hoje**, que a B3 so publica depois das 15h,
+  e falhava de manha. Agora recua ate achar um pregao publicado.
+- Termometro subiu para 4 de 7 componentes (a cota da Alpha Vantage
+  renova a cada dia) e a nota caiu de 34 para 26.
+- Fluxo chegou aos 20 pregoes do grafico.
+- Cache funcionou: o que ja tinha sido baixado ontem nao foi pedido de novo.

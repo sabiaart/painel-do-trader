@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-11-02T22:04:17-03:00",
+ "gerado_em": "2026-11-03T12:39:19-03:00",
  "origem": "pipeline",
  "exemplo": false,
  "desatualizado": false,
@@ -7,27 +7,37 @@
   "niveis": {
    "situacao": "ok",
    "detalhe": "WINZ26 ajuste 170165.0, vol 63.6%, faixa respeitada em 19/30 · WDOX26 ajuste 5421.2, vol 33.6%, faixa respeitada em 20/30",
-   "em": "2026-11-02T22:04:01-03:00"
+   "em": "2026-11-03T12:38:58-03:00"
   },
   "globais": {
-   "situacao": "falhou",
-   "detalhe": "só 0 de 10 indicadores vieram. SPY: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:; QQQ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:",
-   "em": "2026-11-02T22:04:16-03:00"
+   "situacao": "ok",
+   "detalhe": "4 de 10 a favor, pregão de 2026-11-02",
+   "em": "2026-11-03T12:39:15-03:00"
   },
   "fluxo": {
    "situacao": "ok",
-   "detalhe": "19 pregões até 28/10, último -2.71 R$ bi",
-   "em": "2026-11-02T22:04:16-03:00"
+   "detalhe": "20 pregões até 29/10, último -0.10 R$ bi",
+   "em": "2026-11-03T12:39:15-03:00"
   },
   "termometro": {
-   "situacao": "parcial",
-   "detalhe": "nota 34 (Medo), 3 de 6 componentes",
-   "em": "2026-11-02T22:04:17-03:00"
+   "situacao": "ok",
+   "detalhe": "nota 26 (Medo), 4 de 7 componentes",
+   "em": "2026-11-03T12:39:17-03:00"
+  },
+  "resumo": {
+   "situacao": "ok",
+   "detalhe": "3 linhas",
+   "em": "2026-11-03T12:39:18-03:00"
   },
   "contratos": {
    "situacao": "ok",
    "detalhe": "4 contratos. pregão 30/10. WIN com 1.281.259 em aberto",
-   "em": "2026-11-02T22:04:17-03:00"
+   "em": "2026-11-03T12:39:18-03:00"
+  },
+  "opcoes": {
+   "situacao": "ok",
+   "detalhe": "BOVA11 a 165.33, vencimento 19/11, 181 séries",
+   "em": "2026-11-03T12:39:19-03:00"
   }
  }
 }

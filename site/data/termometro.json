@@ -1,19 +1,23 @@
 {
- "gerado_em": "2026-11-02T22:09:02-03:00",
+ "gerado_em": "2026-11-03T12:39:17-03:00",
  "origem": "Alpha Vantage, FRED/Cboe, Banco Central e B3",
  "exemplo": false,
  "desatualizado": false,
- "nota": 34,
+ "nota": 26,
  "zona": "Medo",
  "componentes": [
   {
    "nome": "Momento (EWZ)",
-   "nota": null,
-   "motivo": "EWZ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:"
+   "nota": 0,
+   "fonte": "Alpha Vantage (EWZ, no lugar do Ibovespa)",
+   "detalhe": "preço contra a média de 50 pregões",
+   "janela": 51,
+   "substitui": "Ibovespa",
+   "curto": true
   },
   {
    "nome": "Volatilidade (VXEWZ)",
-   "nota": 100,
+   "nota": 99,
    "fonte": "FRED / Cboe (VXEWZCLS)",
    "detalhe": "contra a média de 50 pregões; volatilidade alta é medo",
    "janela": 252,
@@ -29,10 +33,10 @@
   },
   {
    "nome": "Fluxo estrangeiro 5d",
-   "nota": 0,
+   "nota": 6,
    "fonte": "B3, Boletim Diário (participação dos investidores)",
    "detalhe": "soma de 5 pregões, comparada com as outras janelas do período",
-   "janela": 15,
+   "janela": 16,
    "curto": true
   },
   {
@@ -54,15 +58,14 @@
    "permanente": true
   }
  ],
- "usados": 3,
+ "usados": 4,
  "previstos": 7,
  "historico": {
-  "2026-11-02": 34
+  "2026-11-02": 34,
+  "2026-11-03": 26
  },
- "ontem": null,
+ "ontem": 34,
  "semana": null,
  "mes": null,
- "falhas": [
-  "Momento (EWZ): EWZ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:"
- ]
+ "falhas": []
 }

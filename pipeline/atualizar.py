@@ -19,6 +19,7 @@ import comum
 import fontes
 import historico
 import indicadores
+import resumo as monta_resumo
 import opcoes as coletar_opcoes
 import termometro as calc_termometro
 
@@ -419,6 +420,24 @@ def main() -> int:
     except comum.FonteIndisponivel as erro:
         comum.manter_anterior("termometro", str(erro))
         estado["termometro"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
+
+    # Depois dos globais, do fluxo e do termometro: o resumo le os tres.
+    print("\n[resumo] resumo do dia")
+    try:
+        dados = monta_resumo.montar()
+        houve_sucesso = True
+        comum.gravar("resumo", dados)
+        print(f"  ok {len(dados['linhas'])} linhas, pregão {dados['pregao']}")
+        for linha in dados["linhas"]:
+            print(f"    {linha}")
+        estado["resumo"] = {
+            "situacao": "ok",
+            "detalhe": f"{len(dados['linhas'])} linhas",
+            "em": comum.agora(),
+        }
+    except comum.FonteIndisponivel as erro:
+        comum.manter_anterior("resumo", str(erro))
+        estado["resumo"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
     print("\n[contratos] contratos em aberto (Boletim Diário da B3)")
     try:

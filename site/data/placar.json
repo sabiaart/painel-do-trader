@@ -1,11 +1,11 @@
 {
- "gerado_em": "2026-11-02T17:21:44-03:00",
+ "gerado_em": "2026-11-03T12:39:15-03:00",
  "origem": "Alpha Vantage (fechamento do pregão anterior)",
  "exemplo": false,
- "desatualizado": true,
- "favoraveis": 6,
+ "desatualizado": false,
+ "favoraveis": 4,
  "total": 10,
- "pregao": "2026-10-30",
+ "pregao": "2026-11-02",
  "indicadores": [
   {
    "nome": "S&P 500 (SPY)",
@@ -21,15 +21,15 @@
   },
   {
    "nome": "Vale ADR",
-   "favoravel": true
+   "favoravel": false
   },
   {
    "nome": "Petrobras ADR",
-   "favoravel": true
+   "favoravel": false
   },
   {
    "nome": "Itaú ADR",
-   "favoravel": false
+   "favoravel": true
   },
   {
    "nome": "Dólar (UUP)",
@@ -37,7 +37,7 @@
   },
   {
    "nome": "Petróleo Brent (BNO)",
-   "favoravel": true
+   "favoravel": false
   },
   {
    "nome": "Treasury 7-10a (IEF)",
@@ -47,7 +47,5 @@
    "nome": "China (FXI)",
    "favoravel": true
   }
- ],
- "motivo_falha": "só 0 de 10 indicadores vieram. SPY: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:; QQQ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:",
- "verificado_em": "2026-11-02T22:04:16-03:00"
+ ]
 }

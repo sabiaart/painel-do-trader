@@ -1,122 +1,120 @@
 {
- "gerado_em": "2026-11-02T17:21:44-03:00",
+ "gerado_em": "2026-11-03T12:39:15-03:00",
  "origem": "Alpha Vantage (fechamento do pregão anterior)",
  "exemplo": false,
- "desatualizado": true,
+ "desatualizado": false,
  "ativos": [
   {
    "nome": "S&P 500 (SPY)",
-   "valor": "755,72",
-   "variacao": -1.77,
+   "valor": "752,10",
+   "variacao": -0.48,
    "unidade": "%",
    "peso": "alto",
    "favoravel": false,
    "inverte": false,
    "substitui": "futuro do S&P 500",
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   },
   {
    "nome": "Nasdaq 100 (QQQ)",
-   "valor": "690,49",
-   "variacao": -3.47,
+   "valor": "681,09",
+   "variacao": -1.36,
    "unidade": "%",
    "peso": "médio",
    "favoravel": false,
    "inverte": false,
    "substitui": "futuro do Nasdaq",
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   },
   {
    "nome": "Brasil (EWZ)",
-   "valor": "32,46",
-   "variacao": -2.05,
+   "valor": "32,16",
+   "variacao": -0.92,
    "unidade": "%",
    "peso": "alto",
    "favoravel": false,
    "inverte": false,
    "substitui": null,
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   },
   {
    "nome": "Vale ADR",
-   "valor": "11,39",
-   "variacao": 1.88,
+   "valor": "11,34",
+   "variacao": -0.44,
    "unidade": "%",
    "peso": "alto",
-   "favoravel": true,
+   "favoravel": false,
    "inverte": false,
    "substitui": null,
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   },
   {
    "nome": "Petrobras ADR",
-   "valor": "22,05",
-   "variacao": 0.68,
-   "unidade": "%",
-   "peso": "médio",
-   "favoravel": true,
-   "inverte": false,
-   "substitui": null,
-   "data": "2026-10-30"
-  },
-  {
-   "nome": "Itaú ADR",
-   "valor": "7,13",
-   "variacao": -3.26,
+   "valor": "21,16",
+   "variacao": -4.04,
    "unidade": "%",
    "peso": "médio",
    "favoravel": false,
    "inverte": false,
    "substitui": null,
-   "data": "2026-10-30"
+   "data": "2026-11-02"
+  },
+  {
+   "nome": "Itaú ADR",
+   "valor": "7,17",
+   "variacao": 0.56,
+   "unidade": "%",
+   "peso": "médio",
+   "favoravel": true,
+   "inverte": false,
+   "substitui": null,
+   "data": "2026-11-02"
   },
   {
    "nome": "Dólar (UUP)",
-   "valor": "29,00",
+   "valor": "28,96",
    "variacao": -0.14,
    "unidade": "%",
    "peso": "alto",
    "favoravel": true,
    "inverte": true,
    "substitui": "DXY",
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   },
   {
    "nome": "Petróleo Brent (BNO)",
-   "valor": "71,39",
-   "variacao": 0.89,
+   "valor": "65,95",
+   "variacao": -7.62,
    "unidade": "%",
    "peso": "médio",
-   "favoravel": true,
+   "favoravel": false,
    "inverte": false,
    "substitui": "Brent à vista",
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   },
   {
    "nome": "Treasury 7-10a (IEF)",
-   "valor": "91,76",
-   "variacao": 0.56,
+   "valor": "91,50",
+   "variacao": 0.06,
    "unidade": "%",
    "peso": "alto",
    "favoravel": true,
    "inverte": false,
    "substitui": "juro do Treasury de 10 anos",
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   },
   {
    "nome": "China (FXI)",
-   "valor": "33,08",
-   "variacao": 1.19,
+   "valor": "33,21",
+   "variacao": 0.39,
    "unidade": "%",
    "peso": "médio",
    "favoravel": true,
    "inverte": false,
    "substitui": "minério em Dalian",
-   "data": "2026-10-30"
+   "data": "2026-11-02"
   }
  ],
- "pregao": "2026-10-30",
- "falhas": [],
- "motivo_falha": "só 0 de 10 indicadores vieram. SPY: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:; QQQ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:",
- "verificado_em": "2026-11-02T22:04:16-03:00"
+ "pregao": "2026-11-02",
+ "falhas": []
 }
