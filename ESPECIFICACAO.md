@@ -415,3 +415,23 @@ contratos em aberto de WIN e WDO (dado real, pergunta diferente), remover,
 ou pagar.
 
 - [ ] Decidir o que fazer com o 4.8.
+
+### Acrescentado em 02/11/2026: 4.8 trocado por "Contratos em aberto"
+
+A divisao por tipo de participante nao e publica. Em vez de manter um bloco
+sem fonte, ele foi trocado por **contratos em aberto por contrato**, que a B3
+publica no quadro analitico.
+
+Mostra WIN, IND, WDO e DOL, com o total em aberto e a variacao em 5 pregoes.
+O historico e nosso: a B3 so publica o dia, e `cache-b3/` acumula.
+
+**A pergunta mudou, e a tela diz isso.** "Quem esta comprado" era sobre o
+saldo de um grupo; "contratos em aberto" e o total do mercado, sem lado. O
+texto do bloco explica a diferenca para ninguem ler uma coisa achando que e
+a outra.
+
+Primeira leitura (30/10, com o crash de 26/10 no meio da janela):
+WIN +31,8%, DOL +58,6%, WDO +13,5%, IND +2,6% em 5 pregoes.
+
+`pipeline/manuais.py` foi removido: sem CSV na B3, o leitor manual ficou sem
+entrada. Esta no historico do Git.

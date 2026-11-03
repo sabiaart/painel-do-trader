@@ -104,13 +104,13 @@
         <svg class="chart" id="flow" viewBox="0 0 320 150" role="img" aria-label="Fluxo estrangeiro"></svg>
         <div class="stats" id="fluxo-stats"></div>
       </div>
-      <div class="panel" id="bloco-participantes">
-        <div class="head"><h2>Quem está comprado no WIN</h2></div>
+      <div class="panel" id="bloco-contratos">
+        <div class="head"><h2>Contratos em aberto</h2><span class="muted" style="font-size:12px" id="contratos-pregao"></span></div>
         <div class="tablebox"><table>
-          <thead><tr><th>Participante</th><th class="r">Saldo</th><th class="r">5 dias</th></tr></thead>
-          <tbody id="players"></tbody>
+          <thead><tr><th>Contrato</th><th class="r">Em aberto</th><th class="r" id="contratos-janela">5 dias</th></tr></thead>
+          <tbody id="contratos-linhas"></tbody>
         </table></div>
-        <p class="read" id="players-leitura"></p>
+        <p class="read" id="contratos-leitura"></p>
       </div>
     </section>
 

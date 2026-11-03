@@ -18,8 +18,6 @@ import calculos
 import comum
 import fontes
 import indicadores
-import manuais
-from planilha import PlanilhaIlegivel
 
 JANELA_VOL = 21  # pregoes usados na volatilidade historica
 PAUSA_ENTRE_CONSULTAS = 1.5  # segundos; a Alpha Vantage aceita 1 por segundo
@@ -269,6 +267,68 @@ def atualizar_fluxo() -> str:
     return f"{len(ultimos)} pregões até {fim:%d/%m}, último {valores[-1]:+.2f} R$ bi"
 
 
+#  Os quatro contratos que interessam a quem opera WIN e WDO: o mini e o
+#  cheio de cada um. O cheio entra porque e nele que o institucional
+#  costuma estar, e o tamanho dele contextualiza o mini.
+CONTRATOS = [
+    ("WIN", "WIN · mini índice"),
+    ("IND", "IND · índice cheio"),
+    ("WDO", "WDO · mini dólar"),
+    ("DOL", "DOL · dólar cheio"),
+]
+
+JANELA_CONTRATOS = 5  # pregoes para a variacao
+
+
+def atualizar_contratos() -> str:
+    """Bloco "Contratos em aberto", do quadro analítico da B3.
+
+    Substitui o antigo "Quem esta comprado no WIN". A divisao por tipo de
+    participante nao e publica; o que existe e o total por contrato. E outra
+    pergunta - quanto esta em jogo, nao quem esta de que lado - e a tela
+    precisa dizer isso.
+    """
+    serie = b3.contratos_em_aberto_serie()
+    quando, atuais = serie[-1]
+
+    # Cinco pregoes atras. Com menos historico, compara com o mais antigo
+    # que houver e a tela avisa quantos pregoes sao.
+    passados = serie[-(JANELA_CONTRATOS + 1)][1] if len(serie) > JANELA_CONTRATOS else (
+        serie[0][1] if len(serie) > 1 else {}
+    )
+    janela = min(JANELA_CONTRATOS, len(serie) - 1)
+
+    lista = []
+    for sigla, rotulo in CONTRATOS:
+        atual = atuais.get(sigla)
+        if not atual:
+            continue
+        antes = (passados.get(sigla) or {}).get("contratos")
+        agora = atual["contratos"]
+        variacao = None if antes in (None, 0) else (agora / antes - 1) * 100
+        lista.append(
+            {
+                "nome": rotulo,
+                "contratos": agora,
+                "variacao": None if variacao is None else round(variacao, 1),
+                "direcao": None if variacao is None else ("sobe" if variacao >= 0 else "desce"),
+            }
+        )
+
+    if not lista:
+        raise comum.FonteIndisponivel("nenhum dos contratos do painel apareceu no quadro")
+
+    dados = comum.cabecalho("B3, Boletim Diário (quadro analítico das posições em aberto)")
+    dados["contratos"] = lista
+    dados["pregao"] = quando.isoformat()
+    dados["janela"] = janela
+    dados["pregoes_no_historico"] = len(serie)
+    comum.gravar("contratos", dados)
+
+    win = next((c for c in lista if c["nome"].startswith("WIN")), lista[0])
+    return f"{len(lista)} contratos, pregão {quando:%d/%m}, WIN com {win['contratos']:,} em aberto".replace(",", ".")
+
+
 MESES = [
     "janeiro", "fevereiro", "março", "abril", "maio", "junho",
     "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
@@ -333,21 +393,15 @@ def main() -> int:
         comum.manter_anterior("fluxo", str(erro))
         estado["fluxo"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
-    for nome, rotulo, funcao in (
-        ("participantes", "posições por participante", manuais.atualizar_participantes),
-    ):
-        print(f"\n[{nome}] {rotulo} (arquivo da B3 baixado a mão)")
-        try:
-            resumo = funcao()
-            houve_sucesso = True
-            print(f"  ok {resumo}")
-            estado[nome] = {"situacao": "ok", "detalhe": resumo, "em": comum.agora()}
-        except manuais.SemArquivo as erro:
-            print(f"  - pulado: {erro}. Veja b3-manual/LEIA-ME.md")
-            estado[nome] = {"situacao": "sem arquivo", "detalhe": str(erro), "em": comum.agora()}
-        except (comum.FonteIndisponivel, PlanilhaIlegivel) as erro:
-            comum.manter_anterior(nome, str(erro))
-            estado[nome] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
+    print("\n[contratos] contratos em aberto (Boletim Diário da B3)")
+    try:
+        resumo = atualizar_contratos()
+        houve_sucesso = True
+        print(f"  ok {resumo}")
+        estado["contratos"] = {"situacao": "ok", "detalhe": resumo, "em": comum.agora()}
+    except comum.FonteIndisponivel as erro:
+        comum.manter_anterior("contratos", str(erro))
+        estado["contratos"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
     atualizar_fontes(estado)
 

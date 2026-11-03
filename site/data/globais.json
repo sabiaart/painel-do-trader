@@ -2,7 +2,7 @@
  "gerado_em": "2026-11-02T17:21:44-03:00",
  "origem": "Alpha Vantage (fechamento do pregão anterior)",
  "exemplo": false,
- "desatualizado": false,
+ "desatualizado": true,
  "ativos": [
   {
    "nome": "S&P 500 (SPY)",
@@ -116,5 +116,7 @@
   }
  ],
  "pregao": "2026-10-30",
- "falhas": []
+ "falhas": [],
+ "motivo_falha": "só 0 de 10 indicadores vieram. SPY: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:; QQQ: We have detected your API key as VJYND6PU2DAPOKJB and our standard API rate limit is 25 requests per day. Please subscribe to any of the premium plans at https:",
+ "verificado_em": "2026-11-02T21:50:23-03:00"
 }

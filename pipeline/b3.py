@@ -242,6 +242,26 @@ def fluxo_estrangeiro_diario(limite: int = 24) -> list[tuple[date, float]]:
     return serie
 
 
+def contratos_em_aberto_serie(limite: int = 21) -> list[tuple[date, dict[str, dict]]]:
+    """Contratos em aberto dos ultimos pregoes, do mais antigo para o mais novo.
+
+    A B3 nao publica historico desta tabela: so o dia. O historico e nosso,
+    montado em `cache-b3/` um dia por vez. Por isso a primeira execucao
+    busca varios dias e as seguintes buscam so o que falta.
+    """
+    serie = []
+    for dia in dias_uteis()[:limite]:
+        try:
+            referencia, ativos = contratos_em_aberto(dia)
+        except comum.FonteIndisponivel:
+            continue
+        serie.append((referencia, ativos))
+    if not serie:
+        raise comum.FonteIndisponivel("nenhum pregão com quadro analítico")
+    serie.sort(key=lambda par: par[0])
+    return serie
+
+
 def contratos_em_aberto(dia: date) -> tuple[date, dict[str, dict]]:
     """Contratos em aberto por ativo (WIN, WDO, IND, DOL...).
 

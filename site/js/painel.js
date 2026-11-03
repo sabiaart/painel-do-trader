@@ -255,31 +255,37 @@ async function fluxo() {
     parcial;
 }
 
-/* ---------------- 4.8 Quem esta comprado no WIN ---------------- */
-async function participantes() {
-  const d = await carregar("participantes");
-  if (!d) return semDado($("bloco-participantes"), "as posições por participante");
-  registrar("participantes", d, "bloco-participantes");
+/* ---------------- 4.8 Contratos em aberto ---------------- */
+async function contratos() {
+  const d = await carregar("contratos");
+  if (!d) return semDado($("bloco-contratos"), "os contratos em aberto");
+  registrar("contratos", d, "bloco-contratos");
 
-  $("players").innerHTML = d.participantes
-    .map((p) => {
-      const saldo = `${p.saldo >= 0 ? "+" : "−"}${fmt(Math.abs(p.saldo))}`;
-      /* seta mais texto: a cor sozinha nunca carrega a informação.
-         Sem pregão anterior não há direção, e aí não se desenha seta. */
-      let direcao = `<span class="muted">—</span>`;
-      if (p.direcao) {
-        const sobe = p.direcao === "sobe";
-        direcao = `<span class="${sobe ? "up" : "down"}">${sobe ? "▲" : "▼"} <span style="font-size:11px">${sobe ? "subiu" : "caiu"}</span></span>`;
+  $("contratos-pregao").textContent = d.pregao.split("-").reverse().join("/");
+  $("contratos-janela").textContent = plural(d.janela, "pregão", "pregões");
+
+  $("contratos-linhas").innerHTML = d.contratos
+    .map((c) => {
+      /* seta mais número: a cor sozinha nunca carrega a informação */
+      let variacao = `<span class="muted">—</span>`;
+      if (c.direcao) {
+        const sobe = c.direcao === "sobe";
+        variacao =
+          `<span class="${sobe ? "up" : "down"}">${sobe ? "▲" : "▼"} ` +
+          `${fmt(Math.abs(c.variacao), 1)}%</span>`;
       }
-      return `<tr><td>${p.nome}</td><td class="r num">${saldo}</td><td class="r">${direcao}</td></tr>`;
+      return `<tr><td>${c.nome}</td><td class="r num">${fmt(c.contratos)}</td><td class="r">${variacao}</td></tr>`;
     })
     .join("");
-  /* A seta compara com 5 pregoes atras. Nos primeiros dias de download
-     manual ainda nao ha 5, e a tela precisa avisar. */
-  const base = d.parcial
-    ? ` <span class="muted">A comparação ainda usa só ${plural(d.pregoes_no_historico, "pregão", "pregões")}.</span>`
-    : "";
-  $("players-leitura").innerHTML = `Leitura: <b>${d.leitura}.</b>${base}`;
+
+  /* Este bloco responde "quanto está em jogo", não "quem está de que lado".
+     A divisão por tipo de participante não é pública, e dizer o contrário
+     seria vender gato por lebre. */
+  $("contratos-leitura").innerHTML =
+    `Quantos contratos seguem abertos ao fim do pregão, e como isso mudou em ` +
+    `${plural(d.janela, "pregão", "pregões")}. ` +
+    `<span class="muted">Posição em aberto é o total do mercado, não o saldo de um ` +
+    `grupo: a B3 não publica a divisão por tipo de participante.</span>`;
 }
 
 /* ---------------- 4.9 Niveis do dia + 4.10 Calculadora ---------------- */
@@ -445,7 +451,7 @@ function botoes() {
 /* Cada bloco é independente: um erro em um não derruba os outros. */
 Promise.allSettled([
   placar(), resumo(), globais(), termometro(), noticias(),
-  enquete(), fluxo(), participantes(), niveis(), agenda(),
+  enquete(), fluxo(), contratos(), niveis(), agenda(),
 ]).then(() => {
   /* Um aviso honesto sobre uma pagina mista: diz quanto ja e real e
      manda olhar o selo de cada bloco, em vez de generalizar. */

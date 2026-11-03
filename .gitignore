@@ -27,7 +27,7 @@ b3-manual/*
 # Os dois blocos que vem da B3. Mesma razao: nao redistribuir num repo
 # publico o que a B3 licencia para consulta.
 site/data/fluxo.json
-site/data/participantes.json
+site/data/contratos.json
 
 # Respostas da B3 guardadas para nao pedir duas vezes a mesma coisa.
 cache-b3/
