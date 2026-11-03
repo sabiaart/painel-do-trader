@@ -19,6 +19,7 @@ import comum
 import fontes
 import historico
 import indicadores
+import opcoes as coletar_opcoes
 import termometro as calc_termometro
 
 JANELA_VOL = 21  # pregoes usados na volatilidade historica
@@ -428,6 +429,21 @@ def main() -> int:
     except comum.FonteIndisponivel as erro:
         comum.manter_anterior("contratos", str(erro))
         estado["contratos"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
+
+    print("\n[opcoes] posições em aberto por strike")
+    try:
+        dados = coletar_opcoes.coletar()
+        houve_sucesso = True
+        comum.gravar("opcoes", dados)
+        resumo = (
+            f"{dados['ativo']} a {dados['preco']}, vencimento {dados['vencimento']}, "
+            f"{dados['series_no_vencimento']} séries"
+        )
+        print(f"  ok {resumo}")
+        estado["opcoes"] = {"situacao": "ok", "detalhe": resumo, "em": comum.agora()}
+    except comum.FonteIndisponivel as erro:
+        comum.manter_anterior("opcoes", str(erro))
+        estado["opcoes"] = {"situacao": "falhou", "detalhe": str(erro), "em": comum.agora()}
 
     atualizar_fontes(estado)
 

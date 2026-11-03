@@ -61,9 +61,13 @@ async function montar() {
   const total = gexTotal(S);
 
   /* os quatro numeros do topo */
-  const emPontos = (v) => `≈ ${fmt(Math.round(v * d.razao_ibov))} pts`;
+  /* A conversão para pontos do Ibovespa só existe se soubermos o nível do
+     índice. Sem ela, mostra o strike em reais e pronto - melhor do que
+     multiplicar por um número inventado. */
+  const emPontos = (v) =>
+    d.razao_ibov ? `≈ ${fmt(Math.round(v * d.razao_ibov))} pts · ` : "";
   const cartao = (nome, valor, nota) =>
-    `<div class="gx-stat"><span>${nome}</span><b>${valor == null ? "—" : fmt(valor, valor % 1 ? 2 : 0)}</b><small>${valor == null ? nota : `${emPontos(valor)} · ${nota}`}</small></div>`;
+    `<div class="gx-stat"><span>${nome}</span><b>${valor == null ? "—" : fmt(valor, valor % 1 ? 2 : 0)}</b><small>${valor == null ? nota : `${emPontos(valor)}${nota}`}</small></div>`;
 
   const leituraTotal = total >= 0
     ? "gamma positivo: oscilação tende a ser amortecida"
@@ -75,10 +79,27 @@ async function montar() {
     cartao("Gamma flip", flip, "onde o GEX troca de sinal") +
     `<div class="gx-stat"><span>GEX total</span><b class="${total >= 0 ? "up" : "down"}">${total >= 0 ? "+" : "−"}R$ ${fmt(Math.abs(total) / 1e6, 1)} mi</b><small>por 1% de variação · ${leituraTotal}</small></div>`;
 
+  const conversao = d.razao_ibov
+    ? `Níveis convertidos para pontos do Ibovespa pela relação do dia (${d.ativo} × ${fmt(d.razao_ibov)}). `
+    : `Níveis em reais de ${d.ativo}: não temos o nível do Ibovespa de fonte livre para converter em pontos. `;
+  const sobreVol = d.vol_fonte
+    ? `<br>Gamma calculado com <b>uma volatilidade só para todos os strikes</b> (${d.vol_fonte}), ` +
+      `e não com a implícita de cada série. Isso achata o sorriso de volatilidade e subestima o gamma das pontas. `
+    : "";
+  /* Quando parte das séries não tem strike no cadastro da B3, o gráfico
+     mostra menos posição do que existe. Dizer quanto é o mínimo. */
+  const buraco =
+    d.cobertura_pct != null && d.cobertura_pct < 99
+      ? `<br><b>O gráfico cobre ${fmt(d.cobertura_pct, 1)}% das posições em aberto.</b> ` +
+        `${fmt(d.series_sem_cadastro)} séries (${fmt(d.posicoes_sem_cadastro)} contratos) ficaram de fora ` +
+        `porque o cadastro da B3 desse pregão não traz o strike delas. `
+      : "";
   $("gx-nota").innerHTML =
-    `Níveis convertidos para pontos do Ibovespa pela relação do dia (${d.ativo} × ${fmt(d.razao_ibov)}). ` +
+    conversao +
+    buraco +
     `O GEX supõe formadores de mercado vendidos em calls e comprados em puts. No Brasil isso é menos confiável, ` +
-    `então use como <b>zonas de interesse</b>, não como suporte ou resistência garantidos.`;
+    `então use como <b>zonas de interesse</b>, não como suporte ou resistência garantidos.` +
+    sobreVol;
 
   /* grafico por strike, nos dois modos */
   function desenhar(modo) {

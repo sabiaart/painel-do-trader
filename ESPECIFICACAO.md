@@ -532,3 +532,71 @@ bolsa:
 
 - [ ] Conferir se o cadastro de instrumentos traz strike e tipo (call/put).
 - [ ] Ver se da para filtrar por ativo em vez de baixar as 86 paginas.
+
+### Acrescentado em 02/11/2026: opcoes de BOVA11, pela B3
+
+`pipeline/opcoes.py`. Tres tabelas do Boletim Diario que se completam:
+
+| Tabela | O que da | Paginas |
+|---|---|---|
+| `OpenPositionsEquities` | posicoes em aberto por serie | 43 |
+| `InstrumentsEquities` | strike, tipo e vencimento da serie | 81 |
+| `ConsolidatedTradesEquities` | fechamento do ativo e das opcoes | 74 |
+
+**Tres descobertas que mudam o codigo:**
+
+1. **Para opcao, "Contratos em aberto" vem VAZIA.** O numero esta em
+   "Total de posicoes". Ler a coluna de nome obvio daria uma tabela
+   inteira de zeros, sem erro nenhum na tela.
+2. **Nao da para filtrar no servidor.** O campo "Digite o ticker desejado"
+   do site da B3 filtra no NAVEGADOR, sobre as cem linhas ja carregadas.
+   Entao e preciso varrer as paginas e filtrar aqui. A rota `/filters`
+   responde 204 para estas tabelas.
+3. **O cadastro nao muda.** O strike da BOVAK240W2 e o mesmo todo dia,
+   entao ele e guardado para sempre em `cache-b3/cadastro-opcoes.json` e
+   as 81 paginas so sao varridas quando aparece serie desconhecida.
+
+**Para incluir outro ativo:** uma linha na lista `ATIVOS`, no topo de
+`opcoes.py`. O `codigo` e o que a B3 escreve na coluna "Ativo"
+("BOVA" para BOVA11, "PETR" para PETR4). A coleta ja traz todos; a pagina
+mostra o primeiro, porque tem um bloco so.
+
+**Duas honestidades na tela:**
+
+- **Uma volatilidade so para todos os strikes**, tirada do VXEWZ, em vez da
+  implicita de cada serie. Isso achata o sorriso e subestima o gamma das
+  pontas. O premio de cada opcao esta no boletim (tabela de negocios
+  consolidados), entao da para melhorar.
+- **Sem conversao para pontos do Ibovespa**: exigiria o nivel do indice,
+  que nao temos de fonte livre. Os niveis aparecem em reais, e a nota
+  explica. `razao_ibov` fica nulo em vez de um numero inventado.
+
+- [ ] Calcular a volatilidade implicita de cada serie a partir do premio.
+- [ ] Achar o nivel do Ibovespa para voltar com a conversao em pontos.
+
+### Correcoes de 02/11/2026 nas opcoes, depois de testar
+
+Tres defeitos que so apareceram com dado real:
+
+1. **O vencimento escolhido estava errado.** Pegava o mais proximo; o certo
+   e o que concentra posicao. Medido: o semanal de 06/11 tinha 4,9 milhoes
+   de contratos e o mensal de 19/11, 137 milhoes - vinte e oito vezes mais.
+2. **O preco do BOVA11 nao esta na tabela de negocios consolidados**, que
+   traz as opcoes e um punhado de papeis, mas nao ETFs. Esta na tabela
+   IOPV, com UMA pagina de 70 linhas. Isso derrubou 74 paginas do custo
+   diario, que caiu para 44.
+3. **O cadastro era varrido em toda execucao.** Agora e no maximo uma vez
+   por dia, com a data da ultima varredura guardada.
+
+**Buraco conhecido, visivel na tela:** 448 series com posicao em aberto
+real - uma delas com 10,3 milhoes de contratos - nao aparecem no cadastro
+de instrumentos do mesmo pregao, nem no de equities nem no de derivativos.
+Sem strike nao da para desenhar. O grafico cobre 57,6% das posicoes e diz
+isso na tela. Como o cadastro e acumulado em disco, a cobertura tende a
+melhorar sozinha conforme essas series aparecam em algum pregao.
+
+Primeira leitura real (30/10, BOVA11 a 165,33, vencimento 19/11):
+call wall 172, put wall 164, GEX +R$ 29,4 mi.
+
+- [ ] Entender por que a B3 informa posicao em serie que o cadastro dela
+      nao lista.

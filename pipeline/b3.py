@@ -85,9 +85,41 @@ def dias_uteis(ate: date | None = None) -> list[date]:
     return dias
 
 
-def tabela(nome: str, dia: date, *, limite: int = 500) -> dict:
+PAGINA_GRANDE = 1000  # maximo que a API aceita; 5000 e recusado
+
+
+def tabela_paginada(nome: str, dia: date, *, maximo_paginas: int = 60) -> list[list]:
+    """Todas as linhas de uma tabela grande, juntando as paginas.
+
+    Tabelas como as posicoes em aberto tem ~43 mil linhas por dia, em 43
+    paginas de mil. Nao da para filtrar no servidor: o campo de ticker do
+    site da B3 filtra no navegador, sobre o que ja foi carregado.
+
+    Cada pagina vai para o cache separadamente. Entao o custo e de 43
+    pedidos no PRIMEIRO acesso de cada dia e zero nos seguintes.
+    """
+    linhas: list[list] = []
+    pagina = 1
+    while pagina <= maximo_paginas:
+        resposta = tabela(nome, dia, pagina=pagina, limite=PAGINA_GRANDE)
+        t = resposta["table"]
+        linhas.extend(t.get("values") or [])
+        total = t.get("pageCount") or 1
+        if pagina >= total:
+            break
+        pagina += 1
+    return linhas
+
+
+def colunas_de(nome: str, dia: date) -> list[dict]:
+    """Os cabecalhos da tabela, para casar coluna por rotulo."""
+    return tabela(nome, dia, pagina=1, limite=PAGINA_GRANDE)["table"]["columns"]
+
+
+def tabela(nome: str, dia: date, *, limite: int = 500, pagina: int = 1) -> dict:
     """Uma tabela do boletim, num dia. Baixa so se ainda nao estiver no cache."""
-    guardado = CACHE / nome / f"{dia.isoformat()}.json"
+    sufixo = "" if pagina == 1 and limite == 500 else f"-p{pagina}-{limite}"
+    guardado = CACHE / nome / f"{dia.isoformat()}{sufixo}.json"
     if guardado.exists():
         try:
             return json.loads(guardado.read_text(encoding="utf-8"))
@@ -95,7 +127,7 @@ def tabela(nome: str, dia: date, *, limite: int = 500) -> dict:
             guardado.unlink()  # cache corrompido: baixa de novo
 
     d = dia.isoformat()
-    resposta = _pedir(f"table/{nome}/{d}/{d}/1/{limite}", metodo="POST")
+    resposta = _pedir(f"table/{nome}/{d}/{d}/{pagina}/{limite}", metodo="POST")
     if not isinstance(resposta, dict) or "table" not in resposta:
         raise comum.FonteIndisponivel(f"B3 {nome} em {d}: resposta sem tabela")
 
@@ -240,6 +272,163 @@ def fluxo_estrangeiro_diario(limite: int = 24) -> list[tuple[date, float]]:
             "não consegui isolar nenhum pregão: faltam dias consecutivos do mesmo mês"
         )
     return serie
+
+
+def _indice(colunas: list[dict], *pedacos: str) -> int:
+    from planilha import sem_acento
+
+    for i, coluna in enumerate(colunas):
+        rotulo = sem_acento(coluna.get("friendlyNamePt") or coluna.get("friendlyName") or "")
+        if any(sem_acento(p) in rotulo for p in pedacos):
+            return i
+    raise comum.FonteIndisponivel(
+        f"coluna {pedacos[0]!r} sumiu; tem {[c.get('friendlyNamePt') for c in colunas]}"
+    )
+
+
+def posicoes_em_aberto_opcoes(dia: date, ativos: set[str]) -> dict[str, dict]:
+    """Posicoes em aberto das opcoes dos ativos pedidos, por serie.
+
+    Atencao a uma pegadinha: para OPCAO a coluna "Contratos em aberto" vem
+    vazia. O numero que vale e "Total de posicoes". Usar a primeira daria
+    uma tabela inteira de zeros, sem erro nenhum na tela.
+    """
+    colunas = colunas_de("OpenPositionsEquities", dia)
+    c_papel = _indice(colunas, "instrumento financeiro")
+    c_ativo = _indice(colunas, "ativo")
+    c_segmento = _indice(colunas, "segmento")
+    c_posicoes = _indice(colunas, "total de posicoes")
+
+    saida: dict[str, dict] = {}
+    for linha in tabela_paginada("OpenPositionsEquities", dia):
+        try:
+            if str(linha[c_ativo]) not in ativos:
+                continue
+            segmento = str(linha[c_segmento] or "").upper()
+            if "CALL" not in segmento and "PUT" not in segmento:
+                continue
+            posicoes = linha[c_posicoes]
+            if not posicoes:
+                continue
+            saida[str(linha[c_papel])] = {
+                "ativo": str(linha[c_ativo]),
+                "tipo": "call" if "CALL" in segmento else "put",
+                "posicoes": int(posicoes),
+            }
+        except (IndexError, TypeError, ValueError):
+            continue
+    if not saida:
+        raise comum.FonteIndisponivel(
+            f"nenhuma opção em aberto de {', '.join(sorted(ativos))} em {dia}"
+        )
+    return saida
+
+
+CADASTRO = CACHE / "cadastro-opcoes.json"
+
+
+def cadastro_opcoes(dia: date, papeis: set[str]) -> dict[str, dict]:
+    """Strike, tipo e vencimento de cada serie pedida.
+
+    O cadastro de uma serie nao muda: o strike da BOVAK240W2 e o mesmo
+    hoje e daqui a um mes. Entao ele e guardado para sempre em disco, e a
+    tabela de 81 paginas so e varrida quando aparece serie desconhecida -
+    o que acontece quando a B3 cria vencimentos novos, nao todo dia.
+    """
+    guardado: dict = {}
+    if CADASTRO.exists():
+        try:
+            guardado = json.loads(CADASTRO.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            guardado = {}
+    conhecidas: dict[str, dict] = guardado.get("series") or {}
+
+    faltando = {p for p in papeis if not conhecidas.get(p)}
+    # Varre no maximo uma vez por dia. Series que faltam hoje podem
+    # aparecer no cadastro de amanha - ja aconteceu de a B3 informar
+    # 10 milhoes de contratos em aberto numa serie que o cadastro do
+    # mesmo dia nao lista. Marcar como inexistente para sempre perderia
+    # essa serie quando ela voltasse; varrer a cada execucao seria
+    # 81 paginas por nada.
+    if not faltando or guardado.get("ultima_varredura") == dia.isoformat():
+        return {p: conhecidas[p] for p in papeis if conhecidas.get(p)}
+
+    print(f"    cadastro: {len(faltando)} séries novas, varrendo o cadastro da B3")
+    colunas = colunas_de("InstrumentsEquities", dia)
+    c_papel = _indice(colunas, "instrumento financeiro")
+    c_expira = _indice(colunas, "data de expiracao")
+    c_tipo = _indice(colunas, "tipo de opcao")
+    c_strike = _indice(colunas, "preco de exercicio")
+    c_estilo = _indice(colunas, "estilo de opcao")
+
+    for linha in tabela_paginada("InstrumentsEquities", dia, maximo_paginas=120):
+        try:
+            papel = str(linha[c_papel])
+            if papel not in faltando:
+                continue
+            strike = linha[c_strike]
+            if not strike:
+                continue
+            conhecidas[papel] = {
+                "strike": float(strike),
+                "tipo_b3": str(linha[c_tipo] or ""),
+                "vencimento": str(linha[c_expira] or "")[:10],
+                "estilo": str(linha[c_estilo] or ""),
+            }
+        except (IndexError, TypeError, ValueError):
+            continue
+
+    CADASTRO.parent.mkdir(parents=True, exist_ok=True)
+    CADASTRO.write_text(
+        json.dumps(
+            {"series": conhecidas, "ultima_varredura": dia.isoformat()}, ensure_ascii=False
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+    achadas = sum(1 for p in faltando if conhecidas.get(p))
+    if achadas < len(faltando):
+        print(f"    cadastro: {len(faltando) - achadas} séries seguem sem strike na B3")
+    return {p: conhecidas[p] for p in papeis if conhecidas.get(p)}
+
+
+def valor_de_etf(dia: date, codigo: str) -> float:
+    """Ultimo preco de referencia de um ETF, da tabela IOPV.
+
+    O BOVA11 nao aparece na tabela de negocios consolidados - ela traz as
+    opcoes e um punhado de papeis, nao os ETFs. O IOPV traz, em UMA pagina
+    de 70 linhas, o que custaria 74 paginas pelo outro caminho.
+
+    Ressalva: o IOPV e o valor de referencia da cesta do ETF, nao o preco
+    negociado. Nos dois anda junto por centavos, mas nao sao a mesma coisa.
+    """
+    t = tabela("IOPV", dia, pagina=1, limite=PAGINA_GRANDE)["table"]
+    c_codigo = _indice(t["columns"], "codigo if", "codigo")
+    c_ultimo = _indice(t["columns"], "ultimo preco")
+    for linha in t.get("values") or []:
+        try:
+            if str(linha[c_codigo]).strip().upper() == codigo.upper():
+                return float(linha[c_ultimo])
+        except (IndexError, TypeError, ValueError):
+            continue
+    raise comum.FonteIndisponivel(f"{codigo} não está na tabela IOPV de {dia}")
+
+
+def fechamentos(dia: date, papeis: set[str]) -> dict[str, float]:
+    """Preco de fechamento dos papeis pedidos (acao, ETF ou opcao)."""
+    colunas = colunas_de("ConsolidatedTradesEquities", dia)
+    c_papel = _indice(colunas, "instrumento financeiro")
+    c_fecha = _indice(colunas, "preco de fechamento")
+
+    saida: dict[str, float] = {}
+    for linha in tabela_paginada("ConsolidatedTradesEquities", dia, maximo_paginas=120):
+        try:
+            papel = str(linha[c_papel])
+            if papel in papeis and linha[c_fecha]:
+                saida[papel] = float(linha[c_fecha])
+        except (IndexError, TypeError, ValueError):
+            continue
+    return saida
 
 
 def contratos_em_aberto_serie(limite: int = 21) -> list[tuple[date, dict[str, dict]]]:
