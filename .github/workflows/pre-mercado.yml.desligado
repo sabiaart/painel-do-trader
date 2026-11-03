@@ -1,3 +1,37 @@
+# ===================================================================
+#  ROBO DESLIGADO EM 03/11/2026, A PEDIDO.
+#
+#  O arquivo foi renomeado para .desligado de proposito: o GitHub so le
+#  arquivos .yml nesta pasta, entao com este nome ele nao roda nunca -
+#  nem no horario, nem pelo botao de "Run workflow".
+#
+#  POR QUE DESLIGOU
+#
+#  O painel virou pessoal e offline. Este robo contrariava as duas
+#  decisoes que vieram junto:
+#
+#  1. Ele coletava da B3 a partir dos servidores do GitHub, nao do seu
+#     computador. Sao dezenas de paginas por execucao, todo dia util,
+#     saindo de um datacenter.
+#  2. Ele dava "git push" dos dados num repositorio PUBLICO. Chegou a
+#     publicar: o commit fd67eb8, de 03/11/2026, levou para o GitHub a
+#     frase "o estrangeiro vendeu R$ 0,10 bi no pregao de 29/10", que e
+#     dado da B3 em texto.
+#
+#  Alem disso estava mal configurado para o que o projeto virou: rodava
+#  as 6h40 e a B3 so publica o boletim depois das 15h.
+#
+#  QUEM FAZ O TRABALHO AGORA
+#
+#  O Painel.bat, no seu computador, quando voce der dois cliques.
+#
+#  COMO LIGAR DE NOVO
+#
+#  Renomeie o arquivo de volta para pre-mercado.yml. Antes disso, decida
+#  o que fazer com o passo "Publicar os dados novos": enquanto o
+#  repositorio for publico, ele leva dado da B3 junto.
+# ===================================================================
+
 # Robo do pre-mercado.
 #
 # Roda todo dia util de manha, baixa os dados das fontes publicas, recalcula
