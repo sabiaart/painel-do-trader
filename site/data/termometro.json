@@ -1,19 +1,23 @@
 {
- "gerado_em": "2026-11-03T14:18:55-03:00",
+ "gerado_em": "2026-11-06T09:29:25-03:00",
  "origem": "Alpha Vantage, FRED/Cboe, Banco Central e B3",
  "exemplo": false,
  "desatualizado": false,
- "nota": 35,
+ "nota": 34,
  "zona": "Medo",
  "componentes": [
   {
    "nome": "Momento (EWZ)",
-   "nota": null,
-   "motivo": "falta a chave ALPHA_VANTAGE"
+   "nota": 2,
+   "fonte": "Alpha Vantage (EWZ, no lugar do Ibovespa)",
+   "detalhe": "preço contra a média de 50 pregões",
+   "janela": 51,
+   "substitui": "Ibovespa",
+   "curto": true
   },
   {
    "nome": "Volatilidade (VXEWZ)",
-   "nota": 99,
+   "nota": 100,
    "fonte": "FRED / Cboe (VXEWZCLS)",
    "detalhe": "contra a média de 50 pregões; volatilidade alta é medo",
    "janela": 252,
@@ -22,17 +26,17 @@
   },
   {
    "nome": "Porto seguro (dólar)",
-   "nota": 1,
+   "nota": 3,
    "fonte": "Banco Central (SGS 1, dólar PTAX de venda)",
    "detalhe": "contra a média de 125 pregões; dólar subindo é medo",
-   "janela": 151
+   "janela": 150
   },
   {
    "nome": "Fluxo estrangeiro 5d",
-   "nota": 6,
+   "nota": 32,
    "fonte": "B3, Boletim Diário (participação dos investidores)",
    "detalhe": "soma de 5 pregões, comparada com as outras janelas do período",
-   "janela": 16,
+   "janela": 19,
    "curto": true
   },
   {
@@ -54,16 +58,15 @@
    "permanente": true
   }
  ],
- "usados": 3,
+ "usados": 4,
  "previstos": 7,
  "historico": {
   "2026-11-02": 34,
-  "2026-11-03": 35
+  "2026-11-03": 35,
+  "2026-11-06": 34
  },
- "ontem": 34,
+ "ontem": 35,
  "semana": null,
  "mes": null,
- "falhas": [
-  "Momento (EWZ): falta a chave ALPHA_VANTAGE"
- ]
+ "falhas": []
 }

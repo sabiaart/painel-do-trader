@@ -22,6 +22,17 @@ async function placar() {
   const num = $("placar-num");
   num.textContent = `${d.favoraveis} de ${d.total}`;
   num.className = "bias-big " + (d.favoraveis > d.total / 2 ? "up" : "down");
+  /* A frase era fixa em "apontam para alta" no HTML, e aparecia igual
+     com 4 de 10. Agora segue o placar - inclusive o empate, que não é
+     alta nem baixa. */
+  const leitura = $("placar-leitura");
+  if (leitura) {
+    const metade = d.total / 2;
+    leitura.textContent =
+      d.favoraveis === metade
+        ? "indicadores do pré-mercado estão divididos"
+        : `indicadores do pré-mercado apontam para ${d.favoraveis > metade ? "alta" : "baixa"}`;
+  }
   const medidor = $("meter");
   medidor.innerHTML = "";
   for (let i = 0; i < d.total; i++) {

@@ -1,11 +1,11 @@
 {
- "gerado_em": "2026-11-03T12:39:15-03:00",
+ "gerado_em": "2026-11-06T09:29:14-03:00",
  "origem": "Alpha Vantage (fechamento do pregão anterior)",
  "exemplo": false,
  "desatualizado": false,
- "favoraveis": 4,
+ "favoraveis": 5,
  "total": 10,
- "pregao": "2026-11-02",
+ "pregao": "2026-11-05",
  "indicadores": [
   {
    "nome": "S&P 500 (SPY)",
@@ -21,7 +21,7 @@
   },
   {
    "nome": "Vale ADR",
-   "favoravel": false
+   "favoravel": true
   },
   {
    "nome": "Petrobras ADR",
@@ -33,11 +33,11 @@
   },
   {
    "nome": "Dólar (UUP)",
-   "favoravel": true
+   "favoravel": false
   },
   {
    "nome": "Petróleo Brent (BNO)",
-   "favoravel": false
+   "favoravel": true
   },
   {
    "nome": "Treasury 7-10a (IEF)",

@@ -1,14 +1,14 @@
 {
- "gerado_em": "2026-11-03T14:18:55-03:00",
+ "gerado_em": "2026-11-06T09:29:25-03:00",
  "origem": "montado dos números do próprio painel",
  "exemplo": false,
  "desatualizado": false,
  "linhas": [
-  "Nova York caiu 0,48% no S&P 500, e o EWZ, que segue o Brasil, caiu 0,92%.",
-  "O dólar recuou 0,14%, o petróleo caiu 7,62% e a China subiu 0,39%.",
-  "O estrangeiro vendeu R$ 0,10 bi no pregão de 29/10 e o termômetro está em 35, zona de medo."
+  "Nova York caiu 4,41% no S&P 500, e o EWZ, que segue o Brasil, caiu 1,52%.",
+  "O dólar subiu 0,07%, o petróleo subiu 3,53% e a China subiu 1,01%.",
+  "O estrangeiro vendeu R$ 1,67 bi no pregão de 04/11 e o termômetro está em 34, zona de medo."
  ],
- "pregao": "2026-11-02",
+ "pregao": "2026-11-05",
  "por_ia": false,
  "fechamento": null
 }
